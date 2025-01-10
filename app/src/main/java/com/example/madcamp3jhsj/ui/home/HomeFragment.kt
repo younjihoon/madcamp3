@@ -2,6 +2,8 @@ package com.example.madcamp3jhsj.ui.home
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -14,10 +16,13 @@ import android.widget.TextView
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.madcamp3jhsj.BuildConfig
 import com.example.madcamp3jhsj.databinding.FragmentHomeBinding
 
 import com.google.ai.client.generativeai.GenerativeModel
+import com.google.ai.client.generativeai.type.content
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -99,14 +104,45 @@ class HomeFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
             // ✅ 사진 촬영 성공 후 작업 수행
-            processCapturedPhoto()
+            lifecycleScope.launch {
+                processCapturedPhoto()
+            }
         } else {
             Log.e("HomeFragment", "❌ Image capture failed or cancelled")
         }
     }
 
-    private fun processCapturedPhoto() {
+    private suspend fun processCapturedPhoto() {
+        val photo: Bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
+        val prompt = """
+영수증 정보를 JSON 형식으로 알려주세요. 다음과 같은 정보를 포함하여 상세하게 작성해주세요.
 
+* **purchase_date:** 구매 날짜 (예: 2025.01.09)
+* **total_amount:** 총 금액
+* **items:** 구매 품목 목록 (각 품목의 이름, 수량, 가격)
+
+**예시:**
+```json
+{
+  "purchase_date": "2025.01.09",
+  "total_amount": 6000,
+  "items": [
+    {
+      "name": "아몬드 초코볼(봉)",
+      "quantity": 1,
+      "price": 2400
+    },
+    // ... (다른 품목들)
+  ]
+}```
+
+"""
+        val inputContent = content {
+            image(photo)
+            text(prompt)
+        }
+        val response = generativeModel.generateContent(inputContent)
+        Log.e("HomeFragment", "✅ Image processing response: ${response.text}")
     }
 
     companion object {
