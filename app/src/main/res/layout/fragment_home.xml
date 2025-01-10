@@ -19,4 +19,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+    <Button
+        android:id="@+id/buttonCapture"
+        android:layout_width="56dp"
+        android:layout_height="54dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@android:color/transparent"
+        android:foreground="@drawable/img"
+
+
+        tools:layout_editor_absoluteX="336dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

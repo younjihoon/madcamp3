@@ -1,11 +1,18 @@
+import java.io.FileInputStream
+import java.util.Properties;
+
+var properties = Properties()
+properties.load(FileInputStream("local.properties"))
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
     namespace = "com.example.madcamp3jhsj"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.madcamp3jhsj"
@@ -13,7 +20,9 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
+        val apiKey = properties.getProperty("apiKey")
+        buildConfigField("String", "apiKey", "\"$apiKey\"")
+        println(apiKey)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -34,11 +43,14 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        buildConfig = true
         viewBinding = true
     }
 }
 
 dependencies {
+
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
