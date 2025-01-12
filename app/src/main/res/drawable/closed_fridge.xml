@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="400dp"
+    android:viewportWidth="200"
+    android:viewportHeight="400">
+
+    <!-- 냉장고 외곽 -->
+    <path
+        android:pathData="M10,10 h180 v380 h-180 z"
+        android:fillColor="#D8D8D8"
+        android:strokeColor="#A0A0A0"
+        android:strokeWidth="4" />
+
+    <!-- 냉장고 손잡이 -->
+    <path
+        android:pathData="M15,100 h10 v50 h-10 z"
+        android:fillColor="#A0A0A0" />
+</vector>

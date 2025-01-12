@@ -53,10 +53,7 @@ class HomeFragment : Fragment() {
         captureButton.setOnClickListener {
             openCamera()
         }
-        val textView: TextView = binding.textHome
-        homeViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }
+
         generativeModel = GenerativeModel(
             // The Gemini 1.5 models are versatile and work with most use cases
             modelName = "gemini-1.5-flash",

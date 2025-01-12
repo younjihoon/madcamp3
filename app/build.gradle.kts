@@ -51,7 +51,7 @@ android {
 dependencies {
 
     implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
-
+    implementation("com.airbnb.android:lottie:6.0.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
