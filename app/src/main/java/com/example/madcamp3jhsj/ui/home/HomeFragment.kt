@@ -19,7 +19,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.madcamp3jhsj.BuildConfig
-import com.example.madcamp3jhsj.data.Food
+import com.example.madcamp3jhsj.data.Ingredient
 import com.example.madcamp3jhsj.databinding.FragmentHomeBinding
 
 import com.google.ai.client.generativeai.GenerativeModel
@@ -182,15 +182,16 @@ class HomeFragment : Fragment() {
             Log.e("home","✅ Image processing response: ${getJsonString(response_text)}")
             val receiptInfo:Map<String, Any> = getJsonString(response_text)[0]
             val foodItems:List<Map<String, Any>> = receiptInfo["items"] as? List<Map<String, Any>> ?: emptyList()
-            val foodInfos = mutableListOf<Food>()
+            val foodInfos = mutableListOf<Ingredient>()
             for (foodItem in foodItems){
-                val food = Food(
+                val ingredient = Ingredient(
+                    "",
                     foodItem["name"].toString()?:"",
                     receiptInfo["purchase_date"].toString()?:"",
-                    "",
-                    Uri.fromFile(photoFile)
+                    foodItem["quantity"].toString()?:"",
+                    ""
                 )
-                foodInfos.add(food)
+                foodInfos.add(ingredient)
             }
             Log.e("HomeFragment", "✅ FoodList: $foodInfos")
         }
