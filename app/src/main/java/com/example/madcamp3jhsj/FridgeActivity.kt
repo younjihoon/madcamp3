@@ -1,6 +1,7 @@
 package com.example.madcamp3jhsj
 import android.animation.Animator
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -73,7 +74,13 @@ class FridgeActivity : AppCompatActivity() {
         call.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
-                    println("Login successful! Response code: ${response.body.url.toString()}")
+                    println("Login successful! Response code: ${response.raw().request.url.toString()}")
+                    val url = response.raw().request.url.toString()
+                    println("URL: $url")
+
+                    // URL로 웹 브라우저 열기
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                    startActivity(intent)
                 } else {
                     println("Login failed. Response code: ${response.code()}")
                 }
