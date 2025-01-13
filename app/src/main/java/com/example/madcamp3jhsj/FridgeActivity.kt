@@ -8,6 +8,10 @@ import android.widget.Button
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.airbnb.lottie.LottieAnimationView
+import com.example.madcamp3jhsj.RetrofitClient.apiService
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class FridgeActivity : AppCompatActivity() {
 
@@ -59,9 +63,26 @@ class FridgeActivity : AppCompatActivity() {
     fun setLoginPopup(dialogView: View, dismissPopup: () -> Unit) {
         val loginButton = dialogView.findViewById<Button>(R.id.loginButton)
         loginButton.setOnClickListener {
-
+            performLogin()
             dismissPopup()
         }
+    }
+    fun performLogin() {
+        val call: Call<Void> = apiService.login()
+
+        call.enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    println("Login successful! Response code: ${response.code()}")
+                } else {
+                    println("Login failed. Response code: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                println("Login request failed. Error: ${t.message}")
+            }
+        })
     }
     fun showSelectPopup() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_fridge_select, null)
