@@ -13,15 +13,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.madcamp3jhsj.BuildConfig
+import com.example.madcamp3jhsj.data.Food
 import com.example.madcamp3jhsj.databinding.FragmentHomeBinding
 
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
@@ -37,7 +41,15 @@ class HomeFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-
+    private val takePictureLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            lifecycleScope.launch {
+                processCapturedPhoto()
+            }
+        } else {
+            Log.e("HomeFragment", "❌ Image capture failed or cancelled")
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -78,7 +90,7 @@ class HomeFragment : Fragment() {
                 photoFile
             )
             intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-            startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
+            takePictureLauncher.launch(intent)
         } catch (ex: IOException) {
             Log.e("DashboardFragment", "❌ Error creating image file: ${ex.localizedMessage}")
         }
@@ -94,18 +106,6 @@ class HomeFragment : Fragment() {
             } catch (e: IOException) {
                 Log.e("DashboardFragment", "❌ Failed to create image file: ${e.localizedMessage}")
             }
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == Activity.RESULT_OK) {
-            // ✅ 사진 촬영 성공 후 작업 수행
-            lifecycleScope.launch {
-                processCapturedPhoto()
-            }
-        } else {
-            Log.e("HomeFragment", "❌ Image capture failed or cancelled")
         }
     }
 
@@ -139,7 +139,106 @@ class HomeFragment : Fragment() {
             text(prompt)
         }
         val response = generativeModel.generateContent(inputContent)
-        Log.e("HomeFragment", "✅ Image processing response: ${response.text}")
+        val response_text = response.text
+//        val response_text = """
+//            Image processing response: ```json
+//            {
+//              "purchase_date": "2025.01.09",
+//              "total_amount": 6000,
+//              "items": [
+//                {
+//                  "name": "아몬드 초코볼(봉)",
+//                  "quantity": 1,
+//                  "price": 2400
+//                },
+//                {
+//                  "name": "랑드샤 쇼콜라",
+//                  "quantity": 1,
+//                  "price": 3300
+//                },
+//                {
+//                  "name": "검정봉투(Black envelope)",
+//                  "quantity": 1,
+//                  "price": 50
+//                },
+//                {
+//                  "name": "수저(Spoon)",
+//                  "quantity": 1,
+//                  "price": 50
+//                },
+//                {
+//                  "name": "종이그릇(paper bowl)",
+//                  "quantity": 1,
+//                  "price": 200
+//                }
+//              ]
+//            }
+//            ```
+//
+//        """.trimIndent()
+
+        if (response_text != null) {
+            Log.d("HomeFragment", "✅ Image processing response: ${response_text}")
+            Log.e("home","✅ Image processing response: ${getJsonString(response_text)}")
+            val receiptInfo:Map<String, Any> = getJsonString(response_text)[0]
+            val foodItems:List<Map<String, Any>> = receiptInfo["items"] as? List<Map<String, Any>> ?: emptyList()
+            val foodInfos = mutableListOf<Food>()
+            for (foodItem in foodItems){
+                val food = Food(
+                    foodItem["name"].toString()?:"",
+                    receiptInfo["purchase_date"].toString()?:"",
+                    "",
+                    Uri.fromFile(photoFile)
+                )
+                foodInfos.add(food)
+            }
+            Log.e("HomeFragment", "✅ FoodList: $foodInfos")
+        }
+        else{
+            Log.e("HomeFragment", "❌ Image processing failed")
+        }
+    }
+
+    fun getJsonString(responseText: String?): List<Map<String, Any>>{
+        val responseString = extractNestedJson(responseText?:"")
+        val responseMap: MutableList<Map<String, Any>> = mutableListOf()
+        for (rString in responseString) {
+            responseMap.add(parseJsonToMap(rString))
+        }
+        return responseMap.toList()
+    }
+
+    fun extractNestedJson(input: String): List<String> {
+        val results = mutableListOf<String>()
+        val stack = mutableListOf<Char>() // 중괄호 추적용 스택
+        val currentJson = StringBuilder()
+        var insideJson = false
+
+        for (char in input) {
+            when (char) {
+                '{' -> {
+                    stack.add(char)
+                    insideJson = true
+                }
+
+                '}' -> {
+                    if (stack.isNotEmpty()) stack.removeAt(stack.lastIndex)
+                }
+            }
+            if (insideJson) currentJson.append(char)
+            if (stack.isEmpty() && insideJson) {
+                results.add(currentJson.toString())
+                currentJson.clear()
+                insideJson = false
+            }
+        }
+        return results
+    }
+
+    fun parseJsonToMap(jsonString: String): Map<String, Any> {
+        val gson = Gson()
+        val type = object : TypeToken<Map<String, Any>>() {}.type
+        return gson.fromJson(jsonString, type)
     }
 
     companion object {
