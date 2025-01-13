@@ -7,7 +7,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class Food(
     var name: String,
-    var buyDate: String,
-    var expirationDate: String,
+    var expirationDate: Int,
+    var desciption: String,
     var thumbnail: Uri
 ) : Parcelable

@@ -112,28 +112,69 @@ class HomeFragment : Fragment() {
     private suspend fun processCapturedPhoto() {
         val photo: Bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
         val prompt = """
-영수증 정보를 JSON 형식으로 알려주세요. 다음과 같은 정보를 포함하여 상세하게 작성해주세요.
+            ## 영수증 정보 추출 및 분석
 
-* **purchase_date:** 구매 날짜 (예: 2025.01.09)
-* **total_amount:** 총 금액
-* **items:** 구매 품목 목록 (각 품목의 이름, 수량, 가격)
+            **지시사항:**
 
-**예시:**
-```json
-{
-  "purchase_date": "2025.01.09",
-  "total_amount": 6000,
-  "items": [
-    {
-      "name": "아몬드 초코볼(봉)",
-      "quantity": 1,
-      "price": 2400
-    },
-    // ... (다른 품목들)
-  ]
-}```
+            1. **영수증 이미지를 텍스트로 변환:** 제공된 영수증 이미지를 텍스트 데이터로 변환합니다. OCR (Optical Character Recognition) 기술을 활용하여 이미지 내 텍스트를 정확하게 인식해야 합니다.
 
-"""
+            2. **JSON 데이터 생성:** 변환된 텍스트 데이터를 분석하여 다음과 같은 정보를 포함하는 JSON 형식으로 변환합니다.
+               * **purchase_date:** 구매 날짜 (예: 2025.01.09)
+               * **total_amount:** 총 금액
+               * **items:** 품목 목록 (각 품목의 이름, 수량, 가격)
+
+            3. **냉장 보관 식품 필터링:** "items" 배열에서 냉장 보관해야 하는 식품만 필터링합니다. 냉장 보관 식품 목록은 별도로 제공하지 않으며, 모델이 문맥적으로 판단하여 필터링해야 합니다. (예: 우유, 고기, 채소 등)
+
+            4. **식품 종류 분류:** 필터링된 냉장 보관 식품을 "가공식품" 또는 "신선식품"으로 분류합니다. 
+
+            **예시 입력:**
+            * 영수증 이미지 파일 (jpg, png 등)
+
+            **예시 출력:**
+            ```json
+            {
+              "purchase_date": "2025.01.09",
+              "total_amount": 6000,
+              "items": [
+                {
+                  "name": "사과",
+                  "quantity": 1,
+                  "price": 2400,
+                  "category": "신선식품"
+                },
+                {
+                  "name": "우유(저지방)",
+                  "quantity": 1,
+                  "price": 2500,
+                  "category": "가공식품"
+                },
+                // ... (다른 식품들)
+              ]
+            }
+        """.trimIndent()
+        val prompt2 = """
+        영수증 정보를 JSON 형식으로 알려주세요. 다음과 같은 정보를 포함하여 상세하게 작성해주세요.
+        
+        * **purchase_date:** 구매 날짜 (예: 2025.01.09)
+        * **total_amount:** 총 금액
+        * **items:** 구매 품목 목록 (각 품목의 이름, 수량, 가격)
+        
+        **예시:**
+        ```json
+        {
+          "purchase_date": "2025.01.09",
+          "total_amount": 6000,
+          "items": [
+            {
+              "name": "아몬드 초코볼(봉)",
+              "quantity": 1,
+              "price": 2400
+            },
+            // ... (다른 품목들)
+          ]
+        }```
+        
+        """
         val inputContent = content {
             image(photo)
             text(prompt)
@@ -184,10 +225,14 @@ class HomeFragment : Fragment() {
             val foodItems:List<Map<String, Any>> = receiptInfo["items"] as? List<Map<String, Any>> ?: emptyList()
             val foodInfos = mutableListOf<Ingredient>()
             for (foodItem in foodItems){
+                var type = ""
+                if ((foodItem["category"].toString()?:"").contains("신선")) type = "FRESH"
+                else if ((foodItem["category"].toString()?:"").contains("가공")) type = "PROCESSED"
                 val ingredient = Ingredient(
                     "",
                     foodItem["name"].toString()?:"",
                     receiptInfo["purchase_date"].toString()?:"",
+                    type,
                     foodItem["quantity"].toString()?:"",
                     ""
                 )

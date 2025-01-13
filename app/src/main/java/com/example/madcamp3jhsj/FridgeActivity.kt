@@ -22,6 +22,7 @@ class FridgeActivity : AppCompatActivity() {
 
         // 클릭 시 애니메이션 재생
         lottieView.setOnClickListener {
+            loginLogic()
             lottieView.playAnimation() // 애니메이션 다시 시작
         }
 
@@ -44,7 +45,24 @@ class FridgeActivity : AppCompatActivity() {
             }
         })
     }
+    fun loginLogic() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_login, null)
+        val alertDialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+        setLoginPopup(dialogView) {
+            alertDialog.dismiss()
+        }
 
+        alertDialog.show()
+    }
+    fun setLoginPopup(dialogView: View, dismissPopup: () -> Unit) {
+        val loginButton = dialogView.findViewById<Button>(R.id.loginButton)
+        loginButton.setOnClickListener {
+
+            dismissPopup()
+        }
+    }
     fun showSelectPopup() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_fridge_select, null)
         val alertDialog = AlertDialog.Builder(this)
