@@ -28,7 +28,7 @@ class FridgeActivity : AppCompatActivity() {
         // 클릭 시 애니메이션 재생
         lottieView.setOnClickListener {
             loginLogic()
-            lottieView.playAnimation() // 애니메이션 다시 시작
+             // 애니메이션 다시 시작
         }
 
         // 애니메이션 상태 리스너 추가
@@ -66,6 +66,7 @@ class FridgeActivity : AppCompatActivity() {
         loginButton.setOnClickListener {
             performLogin()
             dismissPopup()
+            lottieView.playAnimation()
         }
     }
     fun performLogin() {
