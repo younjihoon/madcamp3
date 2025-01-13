@@ -73,7 +73,7 @@ class FridgeActivity : AppCompatActivity() {
         call.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
-                    println("Login successful! Response code: ${response.code()}")
+                    println("Login successful! Response code: ${response.body.url.toString()}")
                 } else {
                     println("Login failed. Response code: ${response.code()}")
                 }
