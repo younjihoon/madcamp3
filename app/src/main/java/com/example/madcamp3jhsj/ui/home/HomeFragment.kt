@@ -93,12 +93,12 @@ class HomeFragment : Fragment() {
 
             // 두 번째 선택지
             builder.setNegativeButton("직접 입력하기") { _, _ ->
-                captureAction = "CART"
+                captureAction = "MANUAL"
                 openCamera() // 선택지 2에 대한 함수 실행
             }
 
             builder.setNeutralButton("장바구니 불러오기") { _, _ ->
-                captureAction = "MANUAL"
+                captureAction = "CART"
                 openCamera()
             }
 
@@ -173,7 +173,7 @@ class HomeFragment : Fragment() {
         call.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
-                    println("✅ Upload successful!")
+                    println("✅ Upload successful!: ${response.body()}")
                 } else {
                     println("❌ Upload failed: ${response.code()}")
                 }

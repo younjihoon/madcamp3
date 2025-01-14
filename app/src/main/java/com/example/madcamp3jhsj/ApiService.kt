@@ -22,6 +22,8 @@ interface ApiService {
     @GET("oauth2/authorization/google") // ✅ Change to your actual API endpoint
     fun login(): Call<Void>
 
+
+
     @Multipart
     @POST("detect")
     fun uploadImageWithEmail(
