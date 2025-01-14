@@ -1,12 +1,14 @@
 package com.example.madcamp3jhsj
 
 import android.os.Bundle
+import android.util.Log
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.madcamp3jhsj.data.AppDatabase
+import com.example.madcamp3jhsj.data.User
 import com.example.madcamp3jhsj.data.UserRepository
 import com.example.madcamp3jhsj.databinding.ActivityMainBinding
 import com.example.madcamp3jhsj.ui.dashboard.DashboardFragment
@@ -17,6 +19,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var sharedViewModel: SharedViewModel
+    private lateinit var useremail: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,16 +43,26 @@ class MainActivity : AppCompatActivity() {
             SharedViewModelFactory(repository)
         ).get(SharedViewModel::class.java)
         val username = intent.getStringExtra("USER_NAME")
+        useremail = intent.getStringExtra("USER_EMAIL") ?: ""
         if (username != null) {
             sharedViewModel.loadUserByUsername(username)
         }
+
         // SharedViewModel 초기화
     }
     private fun setInitialFragment(fragmentId: Int) {
         val fragment = when (fragmentId) {
             R.id.navigation_dashboard -> DashboardFragment()
             R.id.navigation_notifications -> NotificationsFragment()
-            else -> HomeFragment()
+            else -> {
+                val homeFragment = HomeFragment()
+                val bundle = Bundle().apply {
+                    putString("USER_EMAIL", useremail) // 유저 이메일 전달
+                    Log.e("[setInFragment]","✅ User email: ${useremail}")
+                }
+                homeFragment.arguments = bundle
+                homeFragment
+            }
         }
 
         // FragmentTransaction을 통해 Fragment 교체

@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.madcamp3jhsj.BuildConfig
+import com.example.madcamp3jhsj.FlaskRetrofitClient
 import com.example.madcamp3jhsj.data.Ingredient
 import com.example.madcamp3jhsj.databinding.FragmentHomeBinding
 
@@ -28,6 +29,12 @@ import com.google.ai.client.generativeai.type.content
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -41,14 +48,20 @@ class HomeFragment : Fragment() {
     private lateinit var generativeModel: GenerativeModel
     private lateinit var ingredientList: MutableList<Ingredient>
     private lateinit var ingredientAdapter: IngredientAdapter
+    private var captureAction: String = ""
 
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-    private val takePictureLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    private var userEmail: String? = null
+    private var takePictureLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             lifecycleScope.launch {
-                processCapturedPhoto()
+                when (captureAction) {
+                    "RECEIPT" -> processReceiptPhoto() // 영수증 처리
+                    "CART" -> processCartPhoto() // 장바구니 처리
+                    else -> Log.e("HomeFragment", "❌ Unknown capture action")
+                }
             }
         } else {
             Log.e("HomeFragment", "❌ Image capture failed or cancelled")
@@ -64,6 +77,7 @@ class HomeFragment : Fragment() {
             ViewModelProvider(this).get(HomeViewModel::class.java)
 
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        userEmail = arguments?.getString("USER_EMAIL")
         val root: View = binding.root
         val captureButton = binding.buttonCapture
         captureButton.setOnClickListener {
@@ -73,15 +87,18 @@ class HomeFragment : Fragment() {
 
             // 첫 번째 선택지
             builder.setPositiveButton("영수증 불러오기") { _, _ ->
+                captureAction = "RECEIPT"
                 openCamera()
             }
 
             // 두 번째 선택지
             builder.setNegativeButton("직접 입력하기") { _, _ ->
+                captureAction = "CART"
                 openCamera() // 선택지 2에 대한 함수 실행
             }
 
             builder.setNeutralButton("장바구니 불러오기") { _, _ ->
+                captureAction = "MANUAL"
                 openCamera()
             }
 
@@ -147,7 +164,28 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private suspend fun processCapturedPhoto() {
+    private suspend fun processCartPhoto() {
+        Log.e("HomeFragment", "✅ Cart processing")
+        val requestFile = RequestBody.create("image/jpeg".toMediaTypeOrNull(), photoFile)
+        val imagePart = MultipartBody.Part.createFormData("image", photoFile.name, requestFile)
+        val emailPart = RequestBody.create("text/plain".toMediaTypeOrNull(), userEmail!!)
+        val call = FlaskRetrofitClient.apiService.uploadImageWithEmail(imagePart, emailPart)
+        call.enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    println("✅ Upload successful!")
+                } else {
+                    println("❌ Upload failed: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                println("❌ Upload failed: ${t.message}")
+            }
+        })
+    }
+
+    private suspend fun processReceiptPhoto() {
         val photo: Bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
         val prompt = """
             ## 영수증 정보 추출 및 분석
