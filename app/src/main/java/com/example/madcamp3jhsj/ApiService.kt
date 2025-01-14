@@ -18,6 +18,6 @@ interface ApiService {
     @POST("detect")
     fun uploadImageWithEmail(
         @Part image: MultipartBody.Part,
-        @Part("email") email: RequestBody
+        @Part("userEmail") userEmail: RequestBody
     ): Call<Void>
 }
