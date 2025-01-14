@@ -11,7 +11,7 @@ import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.airbnb.lottie.LottieAnimationView
-import com.example.madcamp3jhsj.RetrofitClient.apiService
+import com.example.madcamp3jhsj.SpringRetrofitClient.apiService
 import com.example.madcamp3jhsj.data.AppDatabase
 import com.example.madcamp3jhsj.data.User
 import com.example.madcamp3jhsj.data.UserDao
@@ -109,9 +109,9 @@ class FridgeActivity : AppCompatActivity() {
     fun performLogin(dialogView: View) {
         val call: Call<Void> = apiService.login()
         val username = dialogView.findViewById<EditText>(R.id.editText).text.toString()
-        val email = "user@example.com"
+        val useremail = dialogView.findViewById<EditText>(R.id.editEmailText).text.toString()
         val token = "example_token"
-        user = User(username = username, email = email, token = token, last_login = -1)
+        user = User(username = username, email = useremail, token = token, last_login = -1)
         call.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
@@ -167,6 +167,7 @@ class FridgeActivity : AppCompatActivity() {
         val cancelButton = dialogView.findViewById<Button>(R.id.cancelButton)
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra("USER_NAME", user.username)
+        intent.putExtra("USER_EMAIL", user.email)
         fridge1Button.setOnClickListener {
             intent.putExtra("FRAGMENT_ID", R.id.navigation_home)
             this.startActivity(intent)
