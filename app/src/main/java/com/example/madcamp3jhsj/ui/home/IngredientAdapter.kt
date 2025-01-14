@@ -1,4 +1,4 @@
-package com.example.madcamp3jhsj.adapter
+package com.example.madcamp3jhsj.ui.home
 
 import android.view.LayoutInflater
 import android.view.View

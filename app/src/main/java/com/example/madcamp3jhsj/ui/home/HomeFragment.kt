@@ -12,7 +12,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
@@ -21,7 +20,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.madcamp3jhsj.BuildConfig
-import com.example.madcamp3jhsj.adapter.IngredientAdapter
 import com.example.madcamp3jhsj.data.Ingredient
 import com.example.madcamp3jhsj.databinding.FragmentHomeBinding
 

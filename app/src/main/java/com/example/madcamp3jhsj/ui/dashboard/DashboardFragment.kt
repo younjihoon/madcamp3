@@ -1,16 +1,14 @@
 package com.example.madcamp3jhsj.ui.dashboard
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewpager2.widget.ViewPager2
 import com.example.madcamp3jhsj.R
-import com.example.madcamp3jhsj.adapter.IngredientAdapter
-import com.example.madcamp3jhsj.data.Food
 import com.example.madcamp3jhsj.data.Ingredient
+import com.example.madcamp3jhsj.data.Recipe
 import com.example.madcamp3jhsj.databinding.FragmentDashboardBinding
 
 class DashboardFragment : Fragment() {
@@ -33,12 +31,16 @@ class DashboardFragment : Fragment() {
             Ingredient("user","meat","2025-01-13","fresh","1","kg"),
             Ingredient("user","sausage","2025-01-03","processed","500","g")
         )
+        val recipeList = listOf(
+            Recipe("김치찌개", R.drawable.ic_fresh),
+            Recipe("비빔밥", R.drawable.ic_processed),
+            Recipe("불고기", R.drawable.ic_processed)
+        )
 
-        val adapter = IngredientAdapter(ingredientList)
-        binding.recyclerView.apply {
-            layoutManager = LinearLayoutManager(context)
-            this.adapter = adapter
-        }
+        val viewPager = view.findViewById<ViewPager2>(R.id.viewPager)
+        val recipePagerAdapter = RecipePagerAdapter(recipeList)
+        viewPager.adapter = recipePagerAdapter
+
     }
 
     override fun onDestroyView() {
