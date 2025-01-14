@@ -102,8 +102,8 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         ingredientList = mutableListOf(
-            Ingredient("user","meat","2025-01-13","fresh","1","kg"),
-            Ingredient("user","sausage","2025-01-03","processed","500","g")
+            Ingredient(userId = "user", name = "meat", buyDate = "2025-01-13", type = "fresh", quantity = "1", unit = "kg"),
+            Ingredient(userId = "user", name = "sausage", buyDate = "2025-01-03", type = "processed", quantity = "100", unit = "g")
         )
 
         ingredientAdapter = IngredientAdapter(ingredientList)
@@ -275,12 +275,12 @@ class HomeFragment : Fragment() {
                 if ((foodItem["category"].toString()?:"").contains("신선")) type = "fresh"
                 else if ((foodItem["category"].toString()?:"").contains("가공")) type = "processed"
                 val ingredient = Ingredient(
-                    "",
-                    foodItem["name"].toString()?:"",
-                    receiptInfo["purchase_date"].toString()?:"",
-                    type,
-                    foodItem["quantity"].toString()?:"",
-                    ""
+                    userId = "",
+                    name = foodItem["name"].toString()?:"",
+                    buyDate = receiptInfo["purchase_date"].toString()?:"",
+                    type = type,
+                    quantity = foodItem["quantity"].toString()?:"",
+                    unit = "개"
                 )
                 foodInfos.add(ingredient)
             }

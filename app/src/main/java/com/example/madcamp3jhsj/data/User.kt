@@ -13,7 +13,8 @@ data class User(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val username: String,
     val email: String,
-    val token: String
+    val token: String,
+    val last_login: Int
 )
 
 @Dao
@@ -24,50 +25,16 @@ interface UserDao {
     @Query("SELECT * FROM user_table WHERE username = :username LIMIT 1")
     suspend fun getUserByUsername(username: String): User?
 
+    @Query("SELECT * FROM user_table")
+    suspend fun getAllUsers(): List<User>
+
     @Delete
     suspend fun deleteUser(user: User)
 
     @Query("DELETE FROM user_table")
     suspend fun deleteAllUsers()
+
+    @Query("SELECT * FROM user_table WHERE last_login = -1")
+    suspend fun getUsersWithLastLoginMinusOne(): List<User>
 }
 
-
-@Database(entities = [User::class], version = 1, exportSchema = false)
-abstract class AppDatabase : RoomDatabase() {
-    abstract fun userDao(): UserDao
-
-    companion object {
-        @Volatile
-        private var INSTANCE: AppDatabase? = null
-
-        fun getDatabase(context: Context): AppDatabase {
-            return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    "app_database"
-                ).build()
-                INSTANCE = instance
-                instance
-            }
-        }
-    }
-}
-
-class UserRepository(private val userDao: UserDao) {
-    suspend fun insertUser(user: User) {
-        userDao.insertUser(user)
-    }
-
-    suspend fun getUserByUsername(username: String): User? {
-        return userDao.getUserByUsername(username)
-    }
-
-    suspend fun deleteUser(user: User) {
-        userDao.deleteUser(user)
-    }
-
-    suspend fun deleteAllUsers() {
-        userDao.deleteAllUsers()
-    }
-}

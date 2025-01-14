@@ -13,6 +13,7 @@ import com.airbnb.lottie.LottieAnimationView
 import com.example.madcamp3jhsj.RetrofitClient.apiService
 import com.example.madcamp3jhsj.data.AppDatabase
 import com.example.madcamp3jhsj.data.User
+import com.example.madcamp3jhsj.data.UserDao
 import com.example.madcamp3jhsj.data.UserRepository
 import retrofit2.Call
 import retrofit2.Callback
@@ -22,17 +23,26 @@ class FridgeActivity : AppCompatActivity() {
 
     private lateinit var lottieView: LottieAnimationView
     private lateinit var user: User
+    private lateinit var userDao: UserDao
+    private lateinit var repository: UserRepository
+    private lateinit var viewModel: UserViewModel
+    private var isLogin: Boolean = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_fridge) // 위 XML 파일의 레이아웃
-
+        userDao = AppDatabase.getDatabase(this).userDao()
+        repository = UserRepository(userDao)
+        viewModel = UserViewModel(repository)
+        userinit()
         // LottieAnimationView 초기화
         lottieView = findViewById(R.id.lottieAnimationView)
 
         // 클릭 시 애니메이션 재생
         lottieView.setOnClickListener {
-            loginLogic()
+            if (isLogin) lottieView.playAnimation()
+            else loginLogic()
              // 애니메이션 다시 시작
         }
 
@@ -54,6 +64,19 @@ class FridgeActivity : AppCompatActivity() {
 
             }
         })
+    }
+    fun userinit(){
+        viewModel.fetchLastLoggedInUser()
+        viewModel.lastLoggedInUser.observe(this) { user ->
+            if (user != null) {
+                println("Last logged in user: ${user.username}")
+                this.user = user
+                isLogin = true
+                // 필요한 UI 업데이트 처리
+            } else {
+                println("No user found with last_login = -1")
+            }
+        }
     }
     fun loginLogic() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_login, null)
@@ -79,7 +102,7 @@ class FridgeActivity : AppCompatActivity() {
         val username = dialogView.findViewById<EditText>(R.id.editText).text.toString()
         val email = "user@example.com"
         val token = "example_token"
-        user = User(username = username, email = email, token = token)
+        user = User(username = username, email = email, token = token, last_login = -1)
         call.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
@@ -104,10 +127,6 @@ class FridgeActivity : AppCompatActivity() {
 
     fun loginUser(user:User){
         // Room에 유저 정보 저장
-        val userDao = AppDatabase.getDatabase(this@FridgeActivity).userDao()
-        val repository = UserRepository(userDao)
-        val viewModel = UserViewModel(repository)
-
         viewModel.saveUserIfNotExists(user) { isNewUser ->
             if (isNewUser) {
                 println("새 유저 저장 완료: $user")
@@ -115,6 +134,7 @@ class FridgeActivity : AppCompatActivity() {
                 println("유저가 이미 존재합니다: $user.username")
             }
         }
+        viewModel.clearLastLoginExcept(user.username)
     }
 
     fun showSelectPopup() {

@@ -28,8 +28,8 @@ class DashboardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val ingredientList = listOf(
-            Ingredient("user","meat","2025-01-13","fresh","1","kg"),
-            Ingredient("user","sausage","2025-01-03","processed","500","g")
+            Ingredient(0,"user","meat","2025-01-13","fresh","1","kg"),
+            Ingredient(1,"user","sausage","2025-01-03","processed","500","g")
         )
         val recipeList = listOf(
             Recipe("김치찌개", R.drawable.ic_fresh),
