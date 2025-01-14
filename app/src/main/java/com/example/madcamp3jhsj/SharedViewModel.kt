@@ -21,6 +21,24 @@ class SharedViewModel(private val repository: UserRepository) : ViewModel() {
             _user.postValue(userData) // 검색된 유저 데이터를 업데이트
         }
     }
+    fun logout(username: String) {
+        viewModelScope.launch {
+            // 유저의 last_login을 0으로 설정
+            val user = repository.getUserByUsername(username)
+            user?.let {
+                val updatedUser = it.copy(last_login = 0)
+                repository.insertUser(updatedUser) // 업데이트된 유저 저장
+            }
+
+            // LiveData로 유저 상태 초기화
+            _user.postValue(null)
+        }
+    }
+    fun deleteAccount(user: User) {
+        viewModelScope.launch {
+            repository.deleteUser(user)
+        }
+    }
 }
 
 

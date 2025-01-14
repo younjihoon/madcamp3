@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
@@ -32,13 +34,34 @@ class NotificationsFragment : Fragment() {
         _binding = FragmentNotificationsBinding.inflate(inflater, container, false)
         val root: View = binding.root
         val userTextView = root.findViewById<TextView>(R.id.title)
+        val userNamer = root.findViewById<TextView>(R.id.user_name)
+        val userEmail = root.findViewById<TextView>(R.id.user_email)
+        val logoutButton = root.findViewById<Button>(R.id.logout_button)
+        val deleteAccountButton = root.findViewById<Button>(R.id.delete_account_button)
 
         // 유저 데이터 관찰
         sharedViewModel.user.observe(viewLifecycleOwner) { user ->
             user?.let {
                 userTextView.text = "${it.username}님의 식습관 점수는?"
+                userNamer.text = it.username
+                userEmail.text = it.email
+                logoutButton.setOnClickListener {
+                    sharedViewModel.logout(user.username)
+                    Toast.makeText(requireContext(), "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
+                    requireActivity().finish()
+                }
+
+                // 탈퇴하기 버튼 클릭 리스너
+                deleteAccountButton.setOnClickListener {
+                    sharedViewModel.deleteAccount(user)
+                    Toast.makeText(requireContext(), "계정이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                    requireActivity().finish()
+                }
             }
         }
+
+
+
         return root
     }
 
