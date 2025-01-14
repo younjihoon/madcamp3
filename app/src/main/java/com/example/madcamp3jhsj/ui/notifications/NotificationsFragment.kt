@@ -45,6 +45,7 @@ class NotificationsFragment : Fragment() {
         firebaseAuth.currentUser
         logoutButton.setOnClickListener {
             sharedViewModel.logout(firebaseAuth.currentUser!!.displayName!!)
+            firebaseAuth.signOut()
             Toast.makeText(requireContext(), "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
             requireActivity().finish()
         }

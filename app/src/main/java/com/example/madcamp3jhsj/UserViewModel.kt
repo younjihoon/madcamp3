@@ -69,6 +69,10 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
                     val updatedUser = user.copy(last_login = 0) // 토큰 값 초기화
                     repository.insertUser(updatedUser) // 업데이트
                 }
+                else {
+                    val updatedUser = user.copy(last_login = -1) // 토큰 값 초기화
+                    repository.insertUser(updatedUser)
+                }
             }
         }
     }

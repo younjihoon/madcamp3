@@ -34,7 +34,7 @@ interface UserDao {
     @Query("DELETE FROM user_table")
     suspend fun deleteAllUsers()
 
-    @Query("SELECT * FROM user_table WHERE last_login = -1")
+    @Query("SELECT * FROM user_table WHERE last_login != 0")
     suspend fun getUsersWithLastLoginMinusOne(): List<User>
 }
 

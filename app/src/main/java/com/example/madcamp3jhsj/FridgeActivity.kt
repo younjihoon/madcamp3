@@ -163,7 +163,7 @@ class FridgeActivity : AppCompatActivity() {
                     user = User(username=fuser.displayName!!,email=fuser.email!!, token = "", last_login = -1)
 
                     }
-                    Log.d("FirebaseAuth", "signInWithCredential:success - User: ${fuser?.displayName}")
+                    Log.d("FirebaseAuth", "signInWithCredential:success - User: ${fuser}")
                     Toast.makeText(this, "Welcome ${fuser?.displayName}", Toast.LENGTH_SHORT).show()
                     loginUser(user)
                     lottieView.playAnimation()
