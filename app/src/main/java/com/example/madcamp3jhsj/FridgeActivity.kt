@@ -93,6 +93,7 @@ class FridgeActivity : AppCompatActivity() {
                 isLogin = true
                 // 필요한 UI 업데이트 처리
             } else {
+                isLogin = false
                 println("No user found with last_login = -1")
             }
             lottieView.setOnClickListener {
