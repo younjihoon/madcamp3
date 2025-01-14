@@ -3,6 +3,7 @@ import android.animation.Animator
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
@@ -61,15 +62,10 @@ class FridgeActivity : AppCompatActivity() {
             }
         })
     }
-//    override fun onResume() {
-//        super.onResume()
-//        // LottieAnimationView 초기화
-//        if (::lottieView.isInitialized) {
-//            resetAnimation()
-//        } else {
-//            println("LottieAnimationView is not initialized.")
-//        }
-//    }
+    override fun onResume() {
+        super.onResume()
+        userinit()
+    }
     private fun resetAnimation() {
         lottieView.progress = 0f    // 초기 상태로 되돌리기
     }
@@ -85,7 +81,7 @@ class FridgeActivity : AppCompatActivity() {
                 println("No user found with last_login = -1")
             }
             lottieView.setOnClickListener {
-                if (::user.isInitialized) lottieView.playAnimation()
+                if (isLogin) lottieView.playAnimation()
                 else loginLogic()
                 // 애니메이션 다시 시작
             }
@@ -164,6 +160,7 @@ class FridgeActivity : AppCompatActivity() {
     }
 
     fun setSelectPopup(dialogView: View, dismissPopup: () -> Unit) {
+        Log.e("[setSelectPopup]","$user")
         val fridge1Button = dialogView.findViewById<Button>(R.id.fridge1Button)
         val fridge2Button = dialogView.findViewById<Button>(R.id.fridge2Button)
         val fridge3Button = dialogView.findViewById<Button>(R.id.fridge3Button)
