@@ -99,31 +99,7 @@ class FridgeActivity : AppCompatActivity() {
                 if (isLogin) lottieView.playAnimation()
                 else loginLogic()
                 // 애니메이션 다시 시작
-                fetchDataFromRDS()
             }
-        }
-    }
-    fun fetchDataFromRDS() {
-        val url = "jdbc:mysql://fridge-rds.cjymas6uwg1h.ap-northeast-2.rds.amazonaws.com:3306/myfridge"
-        val username = "root"
-        val password = "sojeong0"
-
-        try {
-            // MySQL 드라이버를 사용해 RDS 연결
-            val connection: Connection = DriverManager.getConnection(url, username, password)
-            println("Connection established successfully!")
-
-            // SQL 쿼리 실행
-            val statement = connection.createStatement()
-            val resultSet: ResultSet = statement.executeQuery("SELECT * FROM users")
-
-            while (resultSet.next()) {
-                println("Row: ${resultSet}")
-            }
-
-            connection.close()
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 
@@ -141,50 +117,13 @@ class FridgeActivity : AppCompatActivity() {
     fun setLoginPopup(dialogView: View, dismissPopup: () -> Unit) {
         val loginButton = dialogView.findViewById<Button>(R.id.loginButton)
         loginButton.setOnClickListener {
-            performLogin(dialogView)
+            firebaselogin()
             dismissPopup()
             lottieView.playAnimation()
         }
     }
-    fun performLogin(dialogView: View) {
-        val call: Call<Void> = apiService.login()
-        val username = dialogView.findViewById<EditText>(R.id.editText).text.toString()
-        val useremail = dialogView.findViewById<EditText>(R.id.editEmailText).text.toString()
-        val token = "example_token"
-        user = User(username = username, email = useremail, token = token, last_login = -1)
-        call.enqueue(object : Callback<Void> {
-            override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                if (response.isSuccessful) {
-                    println("Login successful! Response code: ${response.raw().request.url.toString()}")
-                    val url = response.raw().request.url.toString()
-                    println("URL: $url")
-                    firebaselogin()
-                } else {
-                    println("Login failed. Response code: ${response.code()}")
-                }
-            }
-
-            override fun onFailure(call: Call<Void>, t: Throwable) {
-                println("Login request failed. Error: ${t.message}")
-            }
-        })
-        loginUser(user)
-    }
-
-    fun loginUser(user:User){
-        // Room에 유저 정보 저장
-        viewModel.saveUserIfNotExists(user!!) { isNewUser ->
-            if (isNewUser) {
-                println("새 유저 저장 완료: $user")
-            } else {
-                println("유저가 이미 존재합니다: $user.username")
-            }
-        }
-        viewModel.clearLastLoginExcept(user.username)
-    }
 
     fun firebaselogin() {
-
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.client_id)) // Web client ID
             .requestEmail()
@@ -218,17 +157,35 @@ class FridgeActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     // 로그인 성공
-                    val user = firebaseAuth.currentUser
-                    Log.d("FirebaseAuth", "signInWithCredential:success - User: ${user?.displayName}")
-                    Toast.makeText(this, "Welcome ${user?.displayName}", Toast.LENGTH_SHORT).show()
+                    val fuser = firebaseAuth.currentUser
+                    if (fuser!= null){
+                    user = User(username=fuser.displayName!!,email=fuser.email!!, token = "", last_login = -1)
 
+                    }
+                    Log.d("FirebaseAuth", "signInWithCredential:success - User: ${fuser?.displayName}")
+                    Toast.makeText(this, "Welcome ${fuser?.displayName}", Toast.LENGTH_SHORT).show()
+                    loginUser(user)
                 } else {
                     // 로그인 실패
                     Log.e("FirebaseAuth", "signInWithCredential:failure", task.exception)
                     Toast.makeText(this, "Firebase Authentication failed", Toast.LENGTH_SHORT).show()
                 }
             }
+
     }
+
+    fun loginUser(user:User){
+        // Room에 유저 정보 저장
+        viewModel.saveUserIfNotExists(user!!) { isNewUser ->
+            if (isNewUser) {
+                println("새 유저 저장 완료: $user")
+            } else {
+                println("유저가 이미 존재합니다: $user.username")
+            }
+        }
+        viewModel.clearLastLoginExcept(user.username)
+    }
+
     fun showSelectPopup() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_fridge_select, null)
         val alertDialog = AlertDialog.Builder(this)

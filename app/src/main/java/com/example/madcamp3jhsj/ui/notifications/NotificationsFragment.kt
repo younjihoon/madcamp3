@@ -38,7 +38,14 @@ class NotificationsFragment : Fragment() {
         val userEmail = root.findViewById<TextView>(R.id.user_email)
         val logoutButton = root.findViewById<Button>(R.id.logout_button)
         val deleteAccountButton = root.findViewById<Button>(R.id.delete_account_button)
+        logoutButton.setOnClickListener {
+            requireActivity().finish()
+        }
 
+        // 탈퇴하기 버튼 클릭 리스너
+        deleteAccountButton.setOnClickListener {
+            requireActivity().finish()
+        }
         // 유저 데이터 관찰
         sharedViewModel.user.observe(viewLifecycleOwner) { user ->
             user?.let {
