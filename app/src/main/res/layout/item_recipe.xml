@@ -9,8 +9,8 @@
     <!-- 음식 사진 -->
     <ImageView
         android:id="@+id/recipeImage"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
         android:scaleType="centerCrop"
         android:contentDescription="음식 사진"
         app:layout_constraintTop_toTopOf="parent"

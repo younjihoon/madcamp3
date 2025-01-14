@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.util.Log
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.madcamp3jhsj.R
@@ -28,6 +29,7 @@ class RecipePagerAdapter(private val recipeList: List<Recipe>) :
 
     override fun onBindViewHolder(holder: RecipeViewHolder, position: Int) {
         val recipe = recipeList[position]
+        Log.e("RecipePagerAdapter", "Binding recipe: ${recipe}")
         holder.imageView.setImageResource(recipe.imageResId)
         holder.nameTextView.text = recipe.name
         holder.detailsButton.setOnClickListener {
