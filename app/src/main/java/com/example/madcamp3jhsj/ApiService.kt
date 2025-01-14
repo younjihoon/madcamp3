@@ -10,6 +10,14 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 
+data class UserRequest(
+    val id: String,
+    val email: String,
+    val name: String,
+    val picture: String,
+    val role: String = "USER" // 기본값 설정
+)
+
 interface ApiService {
     @GET("oauth2/authorization/google") // ✅ Change to your actual API endpoint
     fun login(): Call<Void>
@@ -20,4 +28,7 @@ interface ApiService {
         @Part image: MultipartBody.Part,
         @Part("userEmail") userEmail: RequestBody
     ): Call<Void>
+
+    @POST("user")
+    fun insertUser(@Body userData: UserRequest): Call<Void>
 }

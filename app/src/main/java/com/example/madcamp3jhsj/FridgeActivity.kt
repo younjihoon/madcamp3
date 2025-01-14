@@ -120,7 +120,7 @@ class FridgeActivity : AppCompatActivity() {
         loginButton.setOnClickListener {
             firebaselogin()
             dismissPopup()
-            lottieView.playAnimation()
+
         }
     }
 
@@ -166,6 +166,7 @@ class FridgeActivity : AppCompatActivity() {
                     Log.d("FirebaseAuth", "signInWithCredential:success - User: ${fuser?.displayName}")
                     Toast.makeText(this, "Welcome ${fuser?.displayName}", Toast.LENGTH_SHORT).show()
                     loginUser(user)
+                    lottieView.playAnimation()
                 } else {
                     // 로그인 실패
                     Log.e("FirebaseAuth", "signInWithCredential:failure", task.exception)
@@ -201,7 +202,6 @@ class FridgeActivity : AppCompatActivity() {
     }
 
     fun setSelectPopup(dialogView: View, dismissPopup: () -> Unit) {
-        Log.e("[setSelectPopup]","$user")
         val fridge1Button = dialogView.findViewById<Button>(R.id.fridge1Button)
         val fridge2Button = dialogView.findViewById<Button>(R.id.fridge2Button)
         val fridge3Button = dialogView.findViewById<Button>(R.id.fridge3Button)
