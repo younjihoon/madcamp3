@@ -1,0 +1,92 @@
+{
+  "project_info": {
+    "project_number": "185381290713",
+    "project_id": "gen-lang-client-0018816775",
+    "storage_bucket": "gen-lang-client-0018816775.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:185381290713:android:9933da1fdb7f3befcd34c8",
+        "android_client_info": {
+          "package_name": "com.example.madcamp20250103"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "185381290713-2c4cu7fvu79me75al3j2tifk8rqq28dq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.madcamp20250103",
+            "certificate_hash": "2ae5df89ee6ca6de1d8340f038c7695e3e0af3e5"
+          }
+        },
+        {
+          "client_id": "185381290713-be0tvfdrd6bnlpt1gkm658uj01nbapks.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.madcamp20250103",
+            "certificate_hash": "ab92e800732a44050b7127fffbcc72175e2f63ac"
+          }
+        },
+        {
+          "client_id": "185381290713-sdr8mv63nvscbrl5rqlofgev7tglqg03.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDE3dp0EZBl8s0DXDei5jATi_BR8Ot9Anc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "185381290713-sdr8mv63nvscbrl5rqlofgev7tglqg03.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:185381290713:android:6d3cb951984e7c7ecd34c8",
+        "android_client_info": {
+          "package_name": "com.example.madcamp3jhsj"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "185381290713-asatsj6r5omdukrlk8mlt5ged2sp2320.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.madcamp3jhsj",
+            "certificate_hash": "2ae5df89ee6ca6de1d8340f038c7695e3e0af3e5"
+          }
+        },
+        {
+          "client_id": "185381290713-sdr8mv63nvscbrl5rqlofgev7tglqg03.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDE3dp0EZBl8s0DXDei5jATi_BR8Ot9Anc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "185381290713-sdr8mv63nvscbrl5rqlofgev7tglqg03.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

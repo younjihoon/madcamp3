@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.airbnb.lottie.LottieAnimationView
@@ -16,9 +17,22 @@ import com.example.madcamp3jhsj.data.AppDatabase
 import com.example.madcamp3jhsj.data.User
 import com.example.madcamp3jhsj.data.UserDao
 import com.example.madcamp3jhsj.data.UserRepository
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.sql.Connection
+import java.sql.DriverManager
+import java.sql.ResultSet
 
 class FridgeActivity : AppCompatActivity() {
 
@@ -27,6 +41,7 @@ class FridgeActivity : AppCompatActivity() {
     private lateinit var userDao: UserDao
     private lateinit var repository: UserRepository
     private lateinit var viewModel: UserViewModel
+    private lateinit var firebaseAuth: FirebaseAuth
     private var isLogin: Boolean = false
 
 
@@ -36,7 +51,7 @@ class FridgeActivity : AppCompatActivity() {
         userDao = AppDatabase.getDatabase(this).userDao()
         repository = UserRepository(userDao)
         viewModel = UserViewModel(repository)
-        // LottieAnimationView 초기화
+        firebaseAuth = FirebaseAuth.getInstance()
         lottieView = findViewById(R.id.lottieAnimationView)
 
         userinit()
@@ -84,9 +99,34 @@ class FridgeActivity : AppCompatActivity() {
                 if (isLogin) lottieView.playAnimation()
                 else loginLogic()
                 // 애니메이션 다시 시작
+                fetchDataFromRDS()
             }
         }
     }
+    fun fetchDataFromRDS() {
+        val url = "jdbc:mysql://fridge-rds.cjymas6uwg1h.ap-northeast-2.rds.amazonaws.com:3306/myfridge"
+        val username = "root"
+        val password = "sojeong0"
+
+        try {
+            // MySQL 드라이버를 사용해 RDS 연결
+            val connection: Connection = DriverManager.getConnection(url, username, password)
+            println("Connection established successfully!")
+
+            // SQL 쿼리 실행
+            val statement = connection.createStatement()
+            val resultSet: ResultSet = statement.executeQuery("SELECT * FROM users")
+
+            while (resultSet.next()) {
+                println("Row: ${resultSet}")
+            }
+
+            connection.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     fun loginLogic() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_login, null)
         val alertDialog = AlertDialog.Builder(this)
@@ -118,10 +158,7 @@ class FridgeActivity : AppCompatActivity() {
                     println("Login successful! Response code: ${response.raw().request.url.toString()}")
                     val url = response.raw().request.url.toString()
                     println("URL: $url")
-
-                    val intent = Intent(this@FridgeActivity, WebViewActivity::class.java)
-                    intent.putExtra("URL", url)
-                    startActivity(intent)
+                    firebaselogin()
                 } else {
                     println("Login failed. Response code: ${response.code()}")
                 }
@@ -146,6 +183,52 @@ class FridgeActivity : AppCompatActivity() {
         viewModel.clearLastLoginExcept(user.username)
     }
 
+    fun firebaselogin() {
+
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.client_id)) // Web client ID
+            .requestEmail()
+            .build()
+        val googleSignInClient = GoogleSignIn.getClient(this, gso)
+        val signInIntent = googleSignInClient.signInIntent
+        Log.d("GoogleSignIn", "signInWithGoogle: ${signInIntent.toString()}")
+        startActivityForResult(signInIntent, 1)
+
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == 1) {
+            val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                // Google Sign-In 성공
+                Log.e("Google Sign-In", "Google Sign...")
+                val account = task.getResult(ApiException::class.java)
+                Log.e("Google Sign-In", "Google Signing...")
+                firebaseAuthWithGoogle(account)
+            } catch (e: Exception) {
+                Log.e("Google Sign-In", "Google Sign-In failed", e)
+            }
+        }
+    }
+
+    private fun firebaseAuthWithGoogle(account: GoogleSignInAccount?) {
+        val credential = GoogleAuthProvider.getCredential(account?.idToken, null)
+        firebaseAuth.signInWithCredential(credential)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // 로그인 성공
+                    val user = firebaseAuth.currentUser
+                    Log.d("FirebaseAuth", "signInWithCredential:success - User: ${user?.displayName}")
+                    Toast.makeText(this, "Welcome ${user?.displayName}", Toast.LENGTH_SHORT).show()
+
+                } else {
+                    // 로그인 실패
+                    Log.e("FirebaseAuth", "signInWithCredential:failure", task.exception)
+                    Toast.makeText(this, "Firebase Authentication failed", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
     fun showSelectPopup() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_fridge_select, null)
         val alertDialog = AlertDialog.Builder(this)
