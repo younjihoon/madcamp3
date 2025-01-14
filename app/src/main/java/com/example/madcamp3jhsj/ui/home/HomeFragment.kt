@@ -14,11 +14,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.madcamp3jhsj.BuildConfig
+import com.example.madcamp3jhsj.adapter.IngredientAdapter
 import com.example.madcamp3jhsj.data.Ingredient
 import com.example.madcamp3jhsj.databinding.FragmentHomeBinding
 
@@ -38,6 +41,9 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private lateinit var photoFile: File
     private lateinit var generativeModel: GenerativeModel
+    private lateinit var ingredientList: MutableList<Ingredient>
+    private lateinit var ingredientAdapter: IngredientAdapter
+
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
@@ -63,7 +69,26 @@ class HomeFragment : Fragment() {
         val root: View = binding.root
         val captureButton = binding.buttonCapture
         captureButton.setOnClickListener {
-            openCamera()
+            // AlertDialog 빌더 생성
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle("냉장고 채우기")
+
+            // 첫 번째 선택지
+            builder.setPositiveButton("영수증 불러오기") { _, _ ->
+                openCamera()
+            }
+
+            // 두 번째 선택지
+            builder.setNegativeButton("직접 입력하기") { _, _ ->
+                openCamera() // 선택지 2에 대한 함수 실행
+            }
+
+            builder.setNeutralButton("장바구니 불러오기") { _, _ ->
+                openCamera()
+            }
+
+            // 다이얼로그 표시
+            builder.create().show()
         }
 
         generativeModel = GenerativeModel(
@@ -73,6 +98,21 @@ class HomeFragment : Fragment() {
             apiKey = BuildConfig.apiKey
         )
         return root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        ingredientList = mutableListOf(
+            Ingredient("user","meat","2025-01-13","fresh","1","kg"),
+            Ingredient("user","sausage","2025-01-03","processed","500","g")
+        )
+
+        ingredientAdapter = IngredientAdapter(ingredientList)
+        binding.recyclerView.apply {
+            layoutManager = LinearLayoutManager(context)
+        }
+        binding.recyclerView.adapter = ingredientAdapter
     }
 
     override fun onDestroyView() {
@@ -124,6 +164,7 @@ class HomeFragment : Fragment() {
                * **items:** 품목 목록 (각 품목의 이름, 수량, 가격)
 
             3. **냉장 보관 식품 필터링:** "items" 배열에서 냉장 보관해야 하는 식품만 필터링합니다. 냉장 보관 식품 목록은 별도로 제공하지 않으며, 모델이 문맥적으로 판단하여 필터링해야 합니다. (예: 우유, 고기, 채소 등)
+               * 필터링 결과는 "refrigerated_items" 배열에 저장합니다.
 
             4. **식품 종류 분류:** 필터링된 냉장 보관 식품을 "가공식품" 또는 "신선식품"으로 분류합니다. 
 
@@ -149,7 +190,14 @@ class HomeFragment : Fragment() {
                   "category": "가공식품"
                 },
                 // ... (다른 식품들)
-              ]
+              ],
+               "refrigerated_items": [
+                {
+                  "name": "소세지",
+                  "quantity": 1,
+                  "price": 900,
+                  "category": "가공식품"
+                },
             }
         """.trimIndent()
         val prompt2 = """
@@ -222,12 +270,12 @@ class HomeFragment : Fragment() {
             Log.d("HomeFragment", "✅ Image processing response: ${response_text}")
             Log.e("home","✅ Image processing response: ${getJsonString(response_text)}")
             val receiptInfo:Map<String, Any> = getJsonString(response_text)[0]
-            val foodItems:List<Map<String, Any>> = receiptInfo["items"] as? List<Map<String, Any>> ?: emptyList()
+            val foodItems:List<Map<String, Any>> = receiptInfo["refrigerated_items"] as? List<Map<String, Any>> ?: receiptInfo["items"] as? List<Map<String, Any>> ?: emptyList()
             val foodInfos = mutableListOf<Ingredient>()
             for (foodItem in foodItems){
                 var type = ""
-                if ((foodItem["category"].toString()?:"").contains("신선")) type = "FRESH"
-                else if ((foodItem["category"].toString()?:"").contains("가공")) type = "PROCESSED"
+                if ((foodItem["category"].toString()?:"").contains("신선")) type = "fresh"
+                else if ((foodItem["category"].toString()?:"").contains("가공")) type = "processed"
                 val ingredient = Ingredient(
                     "",
                     foodItem["name"].toString()?:"",
@@ -238,6 +286,8 @@ class HomeFragment : Fragment() {
                 )
                 foodInfos.add(ingredient)
             }
+            for (foodInfo in foodInfos) ingredientList.add(foodInfo)
+            ingredientAdapter.notifyDataSetChanged()
             Log.e("HomeFragment", "✅ FoodList: $foodInfos")
         }
         else{

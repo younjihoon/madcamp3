@@ -7,9 +7,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.madcamp3jhsj.R
-import com.example.madcamp3jhsj.data.Food
+import com.example.madcamp3jhsj.data.Ingredient
 
-class IngredientAdapter(private val foodList: List<Food>) :
+class IngredientAdapter(private val ingredientList: List<Ingredient>) :
     RecyclerView.Adapter<IngredientAdapter.FoodViewHolder>() {
 
     // ViewHolder: 아이템 뷰를 보관하는 클래스
@@ -28,14 +28,19 @@ class IngredientAdapter(private val foodList: List<Food>) :
 
     override fun onBindViewHolder(holder: FoodViewHolder, position: Int) {
         // 현재 위치의 Food 데이터 가져오기
-        val food = foodList[position]
+        val ingredient = ingredientList[position]
 
         // ViewHolder를 통해 데이터 바인딩
-        holder.nameTextView.text = food.name
-        holder.thumbnailImageView.setImageURI(food.thumbnail)
+        holder.nameTextView.text = ingredient.name
+        holder.expirationDateTextView.text = "가장 오래된 날짜: ${ingredient.buyDate}"
+        holder.foodCountTextView.text = "${ingredient.quantity} ${if (ingredient.unit.isNotEmpty()) ingredient.unit else "개"}"
+        if (ingredient.type =="fresh")
+            holder.thumbnailImageView.setImageResource(R.drawable.ic_fresh)
+        else if (ingredient.type =="processed")
+            holder.thumbnailImageView.setImageResource(R.drawable.ic_processed)
     }
 
     override fun getItemCount(): Int {
-        return foodList.size
+        return ingredientList.size
     }
 }

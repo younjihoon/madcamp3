@@ -34,12 +34,6 @@
             android:text="유통기한"
             android:textSize="14sp" />
 
-        <TextView
-            android:id="@+id/typeTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="분류"
-            android:textSize="14sp" />
     </LinearLayout>
 
     <TextView

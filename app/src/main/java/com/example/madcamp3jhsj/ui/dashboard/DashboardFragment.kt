@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.madcamp3jhsj.R
 import com.example.madcamp3jhsj.adapter.IngredientAdapter
 import com.example.madcamp3jhsj.data.Food
+import com.example.madcamp3jhsj.data.Ingredient
 import com.example.madcamp3jhsj.databinding.FragmentDashboardBinding
 
 class DashboardFragment : Fragment() {
@@ -28,13 +29,12 @@ class DashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val foodList = listOf(
-            Food("Milk", 14, "소의 젖", Uri.parse("android.resource://com.example.madcamp3jhsj/${R.drawable.ic_tomato}")),
-            Food("Eggs", 7, "닭의 알", Uri.EMPTY),
-            Food("Cheese", 30, "우유의 지방", Uri.EMPTY)
+        val ingredientList = listOf(
+            Ingredient("user","meat","2025-01-13","fresh","1","kg"),
+            Ingredient("user","sausage","2025-01-03","processed","500","g")
         )
 
-        val adapter = IngredientAdapter(foodList)
+        val adapter = IngredientAdapter(ingredientList)
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             this.adapter = adapter
