@@ -19,7 +19,12 @@ class MainActivity : AppCompatActivity() {
 
         val navView: BottomNavigationView = binding.navView
 
+        // Intent로 전달된 값 확인
+        val fragmentId = intent.getIntExtra("FRAGMENT_ID", R.id.navigation_home)
+
+        // 초기 Fragment 설정
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
+        navController.navigate(fragmentId)
 
         navView.setupWithNavController(navController)
     }

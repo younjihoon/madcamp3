@@ -21,6 +21,7 @@ import retrofit2.Response
 class FridgeActivity : AppCompatActivity() {
 
     private lateinit var lottieView: LottieAnimationView
+    private lateinit var user: User
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,7 +79,7 @@ class FridgeActivity : AppCompatActivity() {
         val username = dialogView.findViewById<EditText>(R.id.editText).text.toString()
         val email = "user@example.com"
         val token = "example_token"
-        var user = User(username = username, email = email, token = token)
+        user = User(username = username, email = email, token = token)
         call.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
@@ -133,20 +134,22 @@ class FridgeActivity : AppCompatActivity() {
         val fridge1Button = dialogView.findViewById<Button>(R.id.fridge1Button)
         val fridge2Button = dialogView.findViewById<Button>(R.id.fridge2Button)
         val fridge3Button = dialogView.findViewById<Button>(R.id.fridge3Button)
+        val intent = Intent(this, MainActivity::class.java)
+        intent.putExtra("USER_NAME", user.username)
         fridge1Button.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            intent.putExtra("FRAGMENT_ID", R.id.navigation_home)
             this.startActivity(intent)
             dismissPopup()
         }
 
         fridge2Button.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            intent.putExtra("FRAGMENT_ID", R.id.navigation_dashboard)
             this.startActivity(intent)
             dismissPopup()
         }
 
         fridge3Button.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            intent.putExtra("FRAGMENT_ID", R.id.navigation_notifications)
             this.startActivity(intent)
             dismissPopup()
         }
