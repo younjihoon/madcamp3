@@ -119,8 +119,8 @@ class FridgeActivity : AppCompatActivity() {
                     val url = response.raw().request.url.toString()
                     println("URL: $url")
 
-                    // URL로 웹 브라우저 열기
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                    val intent = Intent(this@FridgeActivity, WebViewActivity::class.java)
+                    intent.putExtra("URL", url)
                     startActivity(intent)
                 } else {
                     println("Login failed. Response code: ${response.code()}")
