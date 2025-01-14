@@ -35,16 +35,12 @@ class FridgeActivity : AppCompatActivity() {
         userDao = AppDatabase.getDatabase(this).userDao()
         repository = UserRepository(userDao)
         viewModel = UserViewModel(repository)
-        userinit()
         // LottieAnimationView 초기화
         lottieView = findViewById(R.id.lottieAnimationView)
 
+        userinit()
         // 클릭 시 애니메이션 재생
-        lottieView.setOnClickListener {
-            if (isLogin) lottieView.playAnimation()
-            else loginLogic()
-             // 애니메이션 다시 시작
-        }
+
 
         // 애니메이션 상태 리스너 추가
         lottieView.addAnimatorListener(object : Animator.AnimatorListener {
@@ -65,6 +61,18 @@ class FridgeActivity : AppCompatActivity() {
             }
         })
     }
+//    override fun onResume() {
+//        super.onResume()
+//        // LottieAnimationView 초기화
+//        if (::lottieView.isInitialized) {
+//            resetAnimation()
+//        } else {
+//            println("LottieAnimationView is not initialized.")
+//        }
+//    }
+    private fun resetAnimation() {
+        lottieView.progress = 0f    // 초기 상태로 되돌리기
+    }
     fun userinit(){
         viewModel.fetchLastLoggedInUser()
         viewModel.lastLoggedInUser.observe(this) { user ->
@@ -75,6 +83,11 @@ class FridgeActivity : AppCompatActivity() {
                 // 필요한 UI 업데이트 처리
             } else {
                 println("No user found with last_login = -1")
+            }
+            lottieView.setOnClickListener {
+                if (::user.isInitialized) lottieView.playAnimation()
+                else loginLogic()
+                // 애니메이션 다시 시작
             }
         }
     }
@@ -127,7 +140,7 @@ class FridgeActivity : AppCompatActivity() {
 
     fun loginUser(user:User){
         // Room에 유저 정보 저장
-        viewModel.saveUserIfNotExists(user) { isNewUser ->
+        viewModel.saveUserIfNotExists(user!!) { isNewUser ->
             if (isNewUser) {
                 println("새 유저 저장 완료: $user")
             } else {
@@ -154,24 +167,33 @@ class FridgeActivity : AppCompatActivity() {
         val fridge1Button = dialogView.findViewById<Button>(R.id.fridge1Button)
         val fridge2Button = dialogView.findViewById<Button>(R.id.fridge2Button)
         val fridge3Button = dialogView.findViewById<Button>(R.id.fridge3Button)
+        val cancelButton = dialogView.findViewById<Button>(R.id.cancelButton)
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra("USER_NAME", user.username)
         fridge1Button.setOnClickListener {
             intent.putExtra("FRAGMENT_ID", R.id.navigation_home)
             this.startActivity(intent)
             dismissPopup()
+            resetAnimation()
         }
 
         fridge2Button.setOnClickListener {
             intent.putExtra("FRAGMENT_ID", R.id.navigation_dashboard)
             this.startActivity(intent)
             dismissPopup()
+            resetAnimation()
         }
 
         fridge3Button.setOnClickListener {
             intent.putExtra("FRAGMENT_ID", R.id.navigation_notifications)
-            this.startActivity(intent)
             dismissPopup()
+            resetAnimation()
+            this.startActivity(intent)
+        }
+
+        cancelButton.setOnClickListener {
+            dismissPopup()
+            resetAnimation()
         }
     }
 }
