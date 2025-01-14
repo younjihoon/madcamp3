@@ -6,10 +6,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.airbnb.lottie.LottieAnimationView
 import com.example.madcamp3jhsj.RetrofitClient.apiService
+import com.example.madcamp3jhsj.data.AppDatabase
+import com.example.madcamp3jhsj.data.User
+import com.example.madcamp3jhsj.data.UserRepository
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -64,14 +68,17 @@ class FridgeActivity : AppCompatActivity() {
     fun setLoginPopup(dialogView: View, dismissPopup: () -> Unit) {
         val loginButton = dialogView.findViewById<Button>(R.id.loginButton)
         loginButton.setOnClickListener {
-            performLogin()
+            performLogin(dialogView)
             dismissPopup()
             lottieView.playAnimation()
         }
     }
-    fun performLogin() {
+    fun performLogin(dialogView: View) {
         val call: Call<Void> = apiService.login()
-
+        val username = dialogView.findViewById<EditText>(R.id.editText).text.toString()
+        val email = "user@example.com"
+        val token = "example_token"
+        var user = User(username = username, email = email, token = token)
         call.enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
@@ -91,7 +98,24 @@ class FridgeActivity : AppCompatActivity() {
                 println("Login request failed. Error: ${t.message}")
             }
         })
+        loginUser(user)
     }
+
+    fun loginUser(user:User){
+        // Room에 유저 정보 저장
+        val userDao = AppDatabase.getDatabase(this@FridgeActivity).userDao()
+        val repository = UserRepository(userDao)
+        val viewModel = UserViewModel(repository)
+
+        viewModel.saveUserIfNotExists(user) { isNewUser ->
+            if (isNewUser) {
+                println("새 유저 저장 완료: $user")
+            } else {
+                println("유저가 이미 존재합니다: $user.username")
+            }
+        }
+    }
+
     fun showSelectPopup() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_fridge_select, null)
         val alertDialog = AlertDialog.Builder(this)
