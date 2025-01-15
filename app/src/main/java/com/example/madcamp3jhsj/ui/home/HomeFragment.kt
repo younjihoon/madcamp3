@@ -187,6 +187,8 @@ class HomeFragment : Fragment() {
         return root
     }
     fun updateIngredientList() {
+        ingredientList = mutableListOf()
+        Log.e("[HomeFragment]", "updateIngredientList")
         val call2 = SpringRetrofitClient.apiService.getItemsByUserEmail(firebaseAuth.currentUser?.email ?: "")
         call2.enqueue(object : Callback<List<DetectionItem>> {
             override fun onResponse(
@@ -216,7 +218,11 @@ class HomeFragment : Fragment() {
                 } else {
                     Log.e("MainActivity", "Failed to fetch items: ${response.code()}")
                 }
-                ingredientAdapter.notifyDataSetChanged()
+                ingredientAdapter = IngredientAdapter(ingredientList)
+                binding.recyclerView.apply {
+                    layoutManager = LinearLayoutManager(context)
+                }
+                binding.recyclerView.adapter = ingredientAdapter
             }
 
             override fun onFailure(call: Call<List<DetectionItem>>, t: Throwable) {
@@ -226,12 +232,13 @@ class HomeFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        ingredientList = mutableListOf()
+        Log.e("[HomeFragment]", "onViewCreated")
         ingredientAdapter = IngredientAdapter(ingredientList)
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
         }
         binding.recyclerView.adapter = ingredientAdapter
+        ingredientList = mutableListOf()
         updateIngredientList()
     }
 
