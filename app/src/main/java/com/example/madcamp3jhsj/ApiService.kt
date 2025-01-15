@@ -19,6 +19,14 @@ data class UserRequest(
     val picture: String,
     val role: String = "USER" // 기본값 설정
 )
+data class InsertItemRequest(
+    val item_name: String,
+    val amount: Double,
+    val unit: String,
+    val detected_at: String,
+    val user_id: String,
+    val image_url: String? = null
+)
 data class ManualItem(
     val itemName: String,
     val amount: Double,
@@ -58,4 +66,9 @@ interface ApiService {
 
     @POST("user")
     fun insertUser(@Body userData: UserRequest): Call<Void>
+
+    @POST("items")
+    fun insertItem(
+        @Body request: InsertItemRequest
+    ): Call<Map<String, String>>
 }

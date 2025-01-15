@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.madcamp3jhsj.BuildConfig
 import com.example.madcamp3jhsj.DetectionItem
 import com.example.madcamp3jhsj.FlaskRetrofitClient
+import com.example.madcamp3jhsj.InsertItemRequest
 import com.example.madcamp3jhsj.ManualItem
 import com.example.madcamp3jhsj.R
 import com.example.madcamp3jhsj.SpringRetrofitClient
@@ -59,6 +60,7 @@ class HomeFragment : Fragment() {
     private lateinit var firebaseAuth: FirebaseAuth
     private var captureAction: String = ""
 
+
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
@@ -89,6 +91,7 @@ class HomeFragment : Fragment() {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         userEmail = arguments?.getString("USER_EMAIL")
         val root: View = binding.root
+        ingredientList = mutableListOf()
         val captureButton = binding.buttonCapture
         captureButton.setOnClickListener {
 //            val call = SpringRetrofitClient.apiService.getItemsByUserEmail(userEmail!!)
@@ -153,7 +156,8 @@ class HomeFragment : Fragment() {
                             Toast.makeText(requireContext(), "Please fill all fields correctly.", Toast.LENGTH_SHORT).show()
                             return@setPositiveButton
                         }
-                        val food = Ingredient(id=0, userId = "", name = itemName, buyDate = "", type = "", quantity = amount.toString(), unit = unit)
+                        val currentDate= SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                        val food = Ingredient(id=0, userId = "", name = itemName, buyDate = currentDate, type = "fresh", quantity = amount.toString(), unit = unit)
                         ingredientList.add(food)
                         ingredientAdapter.notifyDataSetChanged()
                         addItemToDatabase(food)
@@ -182,20 +186,53 @@ class HomeFragment : Fragment() {
         )
         return root
     }
+    fun updateIngredientList() {
+        val call2 = SpringRetrofitClient.apiService.getItemsByUserEmail(firebaseAuth.currentUser?.email ?: "")
+        call2.enqueue(object : Callback<List<DetectionItem>> {
+            override fun onResponse(
+                call: Call<List<DetectionItem>>,
+                response: Response<List<DetectionItem>>
+            ) {
+                if (response.isSuccessful) {
+                    val items = response.body()
+                    if (items != null) {
+                        for (item in items) {
+                            Log.d("MainActivity", "Item: ${item.itemName}, Amount: ${item.amount} ${item.unit}")
 
+                            val newIngredient = Ingredient(
+                                id = 0,
+                                userId = item.userId ?: firebaseAuth.currentUser?.email ?: "",
+                                name = item.itemName,
+                                buyDate = item.detectedAt ?: "",
+                                type = item.imageUrl ?: "fresh", // or "processed" if you have a way to classify
+                                quantity = item.amount.toString(),
+                                unit = item.unit ?: "unknown"
+                            )
+                            ingredientList.add(newIngredient)
+
+                        }
+                        // Notify the adapter about the dataset change
+                    }
+                } else {
+                    Log.e("MainActivity", "Failed to fetch items: ${response.code()}")
+                }
+                ingredientAdapter.notifyDataSetChanged()
+            }
+
+            override fun onFailure(call: Call<List<DetectionItem>>, t: Throwable) {
+                Log.e("MainActivity", "API call failed: ${t.message}")
+            }
+        })
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        ingredientList = mutableListOf(
-            Ingredient(userId = "user", name = "meat", buyDate = "2025-01-13", type = "fresh", quantity = "1", unit = "kg"),
-            Ingredient(userId = "user", name = "sausage", buyDate = "2025-01-03", type = "processed", quantity = "100", unit = "g")
-        )
-
+        ingredientList = mutableListOf()
         ingredientAdapter = IngredientAdapter(ingredientList)
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
         }
         binding.recyclerView.adapter = ingredientAdapter
+        updateIngredientList()
     }
 
     override fun onDestroyView() {
@@ -251,6 +288,52 @@ class HomeFragment : Fragment() {
                 println("❌ Upload failed: ${t.message}")
             }
         })
+        val call2 = SpringRetrofitClient.apiService.getItemsByUserEmail(userEmail!!)
+        call2.enqueue(object : Callback<List<DetectionItem>> {
+            override fun onResponse(
+                call: Call<List<DetectionItem>>,
+                response: Response<List<DetectionItem>>
+            ) {
+                if (response.isSuccessful) {
+                    val items = response.body()
+                    if (items != null) {
+                        for (item in items) {
+                            Log.d("MainActivity", "Item: ${item.itemName}, Amount: ${item.amount} ${item.unit}")
+
+                            // Check if the item already exists in the ingredientList
+                            val exists = ingredientList.any {
+                                it.name == item.itemName && it.buyDate == item.detectedAt
+                            }
+
+                            // If not, add to ingredientList and notify the adapter
+                            if (!exists) {
+                                val newIngredient = Ingredient(
+                                    id = 0,
+                                    userId = item.userId ?: firebaseAuth.currentUser?.email ?: "",
+                                    name = item.itemName,
+                                    buyDate = item.detectedAt ?: "",
+                                    type = item.imageUrl?: "fresh", // or "processed" if you have a way to classify
+                                    quantity = item.amount.toString(),
+                                    unit = item.unit ?: "unknown"
+                                )
+                                ingredientList.add(newIngredient)
+                            }
+                        }
+                        // Notify the adapter about the dataset change
+                        ingredientAdapter.notifyDataSetChanged()
+                    }
+                } else {
+                    Log.e("MainActivity", "Failed to fetch items: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<List<DetectionItem>>, t: Throwable) {
+                Log.e("MainActivity", "API call failed: ${t.message}")
+            }
+        })
+
+
+
     }
 
     private suspend fun processReceiptPhoto() {
@@ -402,30 +485,29 @@ class HomeFragment : Fragment() {
         }
     }
     fun addItemToDatabase(item: Ingredient) {
-        val apiService = SpringRetrofitClient.apiService
-
-        val manualItem = ManualItem(
-            itemName = item.name,
+        val newItem = InsertItemRequest(
+            item_name = item.name,
             amount = item.quantity.toDouble(),
-            unit = item.unit
+            unit = item.unit,
+            detected_at = item.buyDate,
+            user_id = firebaseAuth.currentUser?.email ?: "",
+            image_url = item.type
         )
-        val userEmail = firebaseAuth.currentUser?.email ?: ""
-        Log.e("[addtodb]", "$userEmail, $manualItem")
-        val call = apiService.addManualItem(userEmail, manualItem)
-        call.enqueue(object : retrofit2.Callback<ResponseBody> {
+        Log.e("addItemToDatabase", "✅ New Item: $newItem")
+        FlaskRetrofitClient.apiService.insertItem(newItem).enqueue(object : retrofit2.Callback<Map<String, String>> {
             override fun onResponse(
-                call: Call<ResponseBody>,
-                response: retrofit2.Response<ResponseBody>
+                call: Call<Map<String, String>>,
+                response: retrofit2.Response<Map<String, String>>
             ) {
                 if (response.isSuccessful) {
-                    println("Item added successfully!")
+                    println("Response: ${response.body()}")
                 } else {
-                    println("Error: ${response.code()} - ${response.message()}")
+                    println("Error: ${response.code()}, ${response.errorBody()}")
                 }
             }
 
-            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                println("Request failed: ${t.message}")
+            override fun onFailure(call: Call<Map<String, String>>, t: Throwable) {
+                println("Error: ${t.message}")
             }
         })
     }
