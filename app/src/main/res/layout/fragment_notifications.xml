@@ -110,9 +110,10 @@
             android:background="@drawable/rounded_score_card">
 
             <TextView
+                android:id="@+id/fidgeScore"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="50점"
+                android:text="--.-"
                 android:textSize="48sp"
                 android:textColor="#FFFFFF"
                 android:fontFamily="sans-serif-medium"
@@ -147,30 +148,6 @@
             android:orientation="vertical"
             android:layout_marginBottom="16dp">
 
-            <!-- 입력된 식품 섹션 -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="입력된 식품:"
-                android:textSize="16sp"
-                android:textColor="#000000"
-                android:layout_marginBottom="12dp"
-                android:fontFamily="sans-serif-medium" />
-
-            <!-- 그래프 영역 -->
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="160dp"
-                android:background="#F8F8F8"
-                android:layout_marginBottom="20dp">
-
-                <!-- 그래프는 실제 구현 시 차트 라이브러리 사용 -->
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="fitCenter"
-                    android:padding="16dp"/>
-            </FrameLayout>
 
             <!-- 분석 결과 섹션 -->
             <TextView
@@ -190,43 +167,14 @@
                 android:spacing="8dp">
 
                 <TextView
+                    android:id="@+id/suggestions"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="채소: 0개 항목"
+                    android:text="-"
                     android:textSize="14sp"
                     android:textColor="#333333"
                     android:layout_marginBottom="8dp" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="과일: 0개 항목"
-                    android:textSize="14sp"
-                    android:textColor="#333333"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="단백질: 0개 항목"
-                    android:textSize="14sp"
-                    android:textColor="#333333"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="통곡물: 0개 항목"
-                    android:textSize="14sp"
-                    android:textColor="#333333"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="가공식품: 0개 항목"
-                    android:textSize="14sp"
-                    android:textColor="#333333" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

@@ -41,6 +41,11 @@ data class DetectionItem(
     val unit: String,
     val userId: String
 )
+data class HealthCheckResponse(
+    val healthScore: Double,
+    val suggestions: List<String>,
+    val healthy: Boolean
+)
 
 interface ApiService {
     @GET("oauth2/authorization/google") // ✅ Change to your actual API endpoint
@@ -71,4 +76,9 @@ interface ApiService {
     fun insertItem(
         @Body request: InsertItemRequest
     ): Call<Map<String, String>>
+
+    @GET("api/health/check")
+    fun getHealthCheck(
+        @Query("userEmail") userEmail: String
+    ): Call<HealthCheckResponse>
 }
