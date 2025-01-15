@@ -18,6 +18,9 @@ class RecipePagerAdapter(private val recipeList: List<Recipe>) :
     inner class RecipeViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val imageView: ImageView = view.findViewById(R.id.recipeImage)
         val nameTextView: TextView = view.findViewById(R.id.recipeName)
+        val needTextView: TextView = view.findViewById(R.id.recipeNeed)
+        val haveTextView: TextView = view.findViewById(R.id.recipeHave)
+        val timeTextView: TextView = view.findViewById(R.id.recipeTime)
         val detailsButton: Button = view.findViewById(R.id.detailsButton)
     }
 
@@ -30,8 +33,11 @@ class RecipePagerAdapter(private val recipeList: List<Recipe>) :
     override fun onBindViewHolder(holder: RecipeViewHolder, position: Int) {
         val recipe = recipeList[position]
         Log.e("RecipePagerAdapter", "Binding recipe: ${recipe}")
-        holder.imageView.setImageResource(recipe.imageResId)
+        holder.imageView.setImageResource(R.drawable.ic_processed)
         holder.nameTextView.text = recipe.name
+        holder.needTextView.text = recipe.need
+        holder.haveTextView.text = recipe.have
+        holder.timeTextView.text = recipe.time
         holder.detailsButton.setOnClickListener {
             // "자세히 보기" 버튼 클릭 이벤트 처리
             Toast.makeText(holder.itemView.context, "자세히 보기: ${recipe.name}", Toast.LENGTH_SHORT).show()

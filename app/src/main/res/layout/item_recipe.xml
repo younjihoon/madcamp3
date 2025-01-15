@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="#F4EFEB"> <!-- 페이지 배경 색 변경 -->
 
+
     <!-- 음식 사진 -->
     <ImageView
         android:id="@+id/recipeImage"
@@ -32,8 +33,42 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />
-
-    <!-- 자세히 보기 버튼 -->
+    <TextView
+        android:id="@+id/recipeNeed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="필요한 재료"
+        android:textSize="24sp"
+        android:textColor="#000000"
+        android:fontFamily="sans-serif-medium"
+        app:layout_constraintTop_toBottomOf="@id/recipeName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
+    <TextView
+        android:id="@+id/recipeHave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="냉장고에 있는 물건"
+        android:textSize="24sp"
+        android:textColor="#000000"
+        android:fontFamily="sans-serif-medium"
+        app:layout_constraintTop_toBottomOf="@id/recipeNeed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
+    <TextView
+        android:id="@+id/recipeTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="몇분이 걸릴까요"
+        android:textSize="24sp"
+        android:textColor="#000000"
+        android:fontFamily="sans-serif-medium"
+        app:layout_constraintTop_toBottomOf="@id/recipeHave"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
     <Button
         android:id="@+id/detailsButton"
         android:layout_width="wrap_content"
@@ -42,7 +77,7 @@
         android:backgroundTint="#C7D9E5"
         android:textColor="#000000"
         android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/recipeName"
+        app:layout_constraintTop_toBottomOf="@id/recipeTime"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
