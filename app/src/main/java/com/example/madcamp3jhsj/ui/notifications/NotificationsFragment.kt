@@ -12,7 +12,9 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import com.example.madcamp3jhsj.R
 import com.example.madcamp3jhsj.SharedViewModel
+import com.example.madcamp3jhsj.data.User
 import com.example.madcamp3jhsj.databinding.FragmentNotificationsBinding
+import com.google.firebase.auth.FirebaseAuth
 
 class NotificationsFragment : Fragment() {
 
@@ -22,7 +24,8 @@ class NotificationsFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
     private val sharedViewModel: SharedViewModel by activityViewModels()
-
+    private lateinit var firebaseAuth: FirebaseAuth
+    private lateinit var user: User
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -38,33 +41,28 @@ class NotificationsFragment : Fragment() {
         val userEmail = root.findViewById<TextView>(R.id.user_email)
         val logoutButton = root.findViewById<Button>(R.id.logout_button)
         val deleteAccountButton = root.findViewById<Button>(R.id.delete_account_button)
-
-        // 유저 데이터 관찰
-        sharedViewModel.user.observe(viewLifecycleOwner) { user ->
-            user?.let {
-                userTextView.text = "${it.username}님의 식습관 점수는?"
-                userNamer.text = it.username
-                userEmail.text = it.email
-                logoutButton.setOnClickListener {
-                    sharedViewModel.logout(user.username)
-                    Toast.makeText(requireContext(), "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
-                    requireActivity().finish()
-                }
-
-                // 탈퇴하기 버튼 클릭 리스너
-                deleteAccountButton.setOnClickListener {
-                    sharedViewModel.deleteAccount(user)
-                    Toast.makeText(requireContext(), "계정이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
-                    requireActivity().finish()
-                }
-            }
+        firebaseAuth = FirebaseAuth.getInstance()
+        firebaseAuth.currentUser
+        logoutButton.setOnClickListener {
+            sharedViewModel.logout(firebaseAuth.currentUser!!.displayName!!)
+            firebaseAuth.signOut()
+            Toast.makeText(requireContext(), "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
+            requireActivity().finish()
         }
-
-
-
+        userTextView.text = "${firebaseAuth.currentUser!!.displayName!!}님의 식습관 점수는?"
+        userNamer.text = firebaseAuth.currentUser!!.displayName!!
+        userEmail.text = firebaseAuth.currentUser!!.email!!
+        deleteAccountButton.setOnClickListener {
+            sharedViewModel.deleteAccountByUserName(firebaseAuth.currentUser!!.displayName!!)
+            Toast.makeText(requireContext(), "계정이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+            requireActivity().finish()
+        }
         return root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

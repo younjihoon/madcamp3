@@ -56,6 +56,15 @@ class SharedViewModel(private val repository: UserRepository) : ViewModel() {
 
         }
     }
+
+    fun deleteAccountByUserName(username: String) {
+        viewModelScope.launch {
+            val user = repository.getUserByUsername(username)
+            user?.let {
+                repository.deleteUser(user)
+            }
+        }
+    }
 }
 
 
