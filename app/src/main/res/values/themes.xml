@@ -1,12 +1,10 @@
 <!-- res/values/styles.xml -->
 <resources>
     <!-- Custom TextAppearance style -->
-    <style name="CustomTextAppearance" parent="TextAppearance.AppCompat">
-        <item name="android:fontFamily">@font/my_custom_font</item>
-    </style>
 
     <!-- Base application theme -->
     <style name="Theme.MyApplication" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:fontFamily">@font/my_custom_font</item>
         <item name="android:windowFullscreen">true</item>
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/purple_500</item>
@@ -19,7 +17,5 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
 
-        <!-- Apply custom text appearance globally -->
-        <item name="android:textAppearance">@style/CustomTextAppearance</item>
     </style>
 </resources>

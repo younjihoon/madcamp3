@@ -21,7 +21,6 @@ class RecipePagerAdapter(private val recipeList: List<Recipe>) :
         val needTextView: TextView = view.findViewById(R.id.recipeNeed)
         val haveTextView: TextView = view.findViewById(R.id.recipeHave)
         val timeTextView: TextView = view.findViewById(R.id.recipeTime)
-        val detailsButton: Button = view.findViewById(R.id.detailsButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecipeViewHolder {
@@ -38,10 +37,6 @@ class RecipePagerAdapter(private val recipeList: List<Recipe>) :
         holder.needTextView.text = recipe.need
         holder.haveTextView.text = recipe.have
         holder.timeTextView.text = recipe.time
-        holder.detailsButton.setOnClickListener {
-            // "자세히 보기" 버튼 클릭 이벤트 처리
-            Toast.makeText(holder.itemView.context, "자세히 보기: ${recipe.name}", Toast.LENGTH_SHORT).show()
-        }
     }
 
     override fun getItemCount(): Int = recipeList.size
