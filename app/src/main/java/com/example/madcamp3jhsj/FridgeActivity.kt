@@ -209,6 +209,7 @@ class FridgeActivity : AppCompatActivity() {
         val fridge1Button = dialogView.findViewById<CardView>(R.id.fridge1Button)
         val fridge2Button = dialogView.findViewById<CardView>(R.id.fridge2Button)
         val fridge3Button = dialogView.findViewById<CardView>(R.id.fridge3Button)
+        val parentButton = dialogView.findViewById<CardView>(R.id.parentButton)
         val cancelButton = dialogView.findViewById<Button>(R.id.cancelButton)
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra("USER_NAME", user.username)
@@ -233,6 +234,42 @@ class FridgeActivity : AppCompatActivity() {
             resetAnimation()
             this.startActivity(intent)
         }
+
+        parentButton.setOnClickListener {
+            // Inflate the custom layout for the popup
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_parent, null)
+
+            // Build the AlertDialog
+            val dialog = AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create()
+
+            // Find views in the dialog
+            val unitInput = dialogView.findViewById<EditText>(R.id.editTextUnit)
+            val saveButton = dialogView.findViewById<Button>(R.id.saveButton)
+            val cancelButton = dialogView.findViewById<Button>(R.id.cancelButton)
+
+            // Set click listeners for buttons
+            saveButton.setOnClickListener {
+                val itemUnit = unitInput.text.toString()
+
+                // Validate input
+                if (itemUnit.isNotBlank()) {
+
+                    dialog.dismiss()
+                } else {
+                    Toast.makeText(this, "모든 필드를 입력해주세요.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            cancelButton.setOnClickListener {
+                dialog.dismiss()
+            }
+
+            // Show the dialog
+            dialog.show()
+        }
+
 
         cancelButton.setOnClickListener {
             dismissPopup()
