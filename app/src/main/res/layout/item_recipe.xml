@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F8F8">
+    android:background="#F4EFEB"> <!-- 페이지 배경 색 변경 -->
 
     <!-- 음식 사진 -->
     <ImageView
@@ -39,8 +39,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="자세히 보기"
-        android:backgroundTint="#FF5722"
-        android:textColor="#FFFFFF"
+        android:backgroundTint="#C7D9E5"
+        android:textColor="#000000"
         android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/recipeName"
         app:layout_constraintStart_toStartOf="parent"
