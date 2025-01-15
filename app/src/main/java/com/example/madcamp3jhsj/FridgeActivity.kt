@@ -29,6 +29,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -81,6 +82,9 @@ class FridgeActivity : AppCompatActivity() {
     }
     override fun onResume() {
         super.onResume()
+        lottieView.setOnClickListener {
+            null
+        }
         userinit()
     }
     private fun resetAnimation() {
@@ -122,7 +126,6 @@ class FridgeActivity : AppCompatActivity() {
         loginButton.setOnClickListener {
             firebaselogin()
             dismissPopup()
-
         }
     }
 
@@ -207,6 +210,7 @@ class FridgeActivity : AppCompatActivity() {
         val fridge1Button = dialogView.findViewById<CardView>(R.id.fridge1Button)
         val fridge2Button = dialogView.findViewById<CardView>(R.id.fridge2Button)
         val fridge3Button = dialogView.findViewById<CardView>(R.id.fridge3Button)
+        val parentButton = dialogView.findViewById<CardView>(R.id.parentButton)
         val cancelButton = dialogView.findViewById<Button>(R.id.cancelButton)
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra("USER_NAME", user.username)
@@ -232,9 +236,69 @@ class FridgeActivity : AppCompatActivity() {
             this.startActivity(intent)
         }
 
+        parentButton.setOnClickListener {
+            // Inflate the custom layout for the popup
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_parent, null)
+
+            // Build the AlertDialog
+            val dialog = AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create()
+
+            // Find views in the dialog
+            val unitInput = dialogView.findViewById<EditText>(R.id.editTextUnit)
+            val saveButton = dialogView.findViewById<Button>(R.id.saveButton)
+            val cancelButton = dialogView.findViewById<Button>(R.id.cancelButton)
+
+            // Set click listeners for buttons
+            saveButton.setOnClickListener {
+                val itemUnit = unitInput.text.toString()
+
+                // Validate input
+                if (itemUnit.isNotBlank()) {
+                    addParentPhone(firebaseAuth.currentUser?.email ?: "", itemUnit)
+                    dialog.dismiss()
+                } else {
+                    Toast.makeText(this, "모든 필드를 입력해주세요.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            cancelButton.setOnClickListener {
+                dialog.dismiss()
+            }
+
+            // Show the dialog
+            dialog.show()
+        }
+
+
         cancelButton.setOnClickListener {
             dismissPopup()
             resetAnimation()
         }
+    }
+
+    fun addParentPhone(userEmail: String, parentPhone: String) {
+        val call = SpringRetrofitClient.apiService.addParentPhone(userEmail, parentPhone)
+
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(
+                call: Call<ResponseBody>,
+                response: Response<ResponseBody>
+            ) {
+                if (response.isSuccessful) {
+                    // 성공적으로 요청이 완료된 경우
+                    println("Parent phone added successfully!")
+                } else {
+                    // 요청이 실패한 경우
+                    println("Failed to add parent phone. Code: ${response.code()}, Message: ${response.message()}")
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                // 네트워크 오류 또는 요청 실패 처리
+                println("API call failed: ${t.message}")
+            }
+        })
     }
 }
