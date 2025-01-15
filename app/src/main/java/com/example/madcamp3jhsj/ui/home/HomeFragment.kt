@@ -12,6 +12,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
@@ -20,18 +22,24 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.madcamp3jhsj.BuildConfig
+import com.example.madcamp3jhsj.DetectionItem
 import com.example.madcamp3jhsj.FlaskRetrofitClient
+import com.example.madcamp3jhsj.ManualItem
+import com.example.madcamp3jhsj.R
+import com.example.madcamp3jhsj.SpringRetrofitClient
 import com.example.madcamp3jhsj.data.Ingredient
 import com.example.madcamp3jhsj.databinding.FragmentHomeBinding
 
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
+import com.google.firebase.auth.FirebaseAuth
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -48,6 +56,7 @@ class HomeFragment : Fragment() {
     private lateinit var generativeModel: GenerativeModel
     private lateinit var ingredientList: MutableList<Ingredient>
     private lateinit var ingredientAdapter: IngredientAdapter
+    private lateinit var firebaseAuth: FirebaseAuth
     private var captureAction: String = ""
 
     // This property is only valid between onCreateView and
@@ -75,12 +84,46 @@ class HomeFragment : Fragment() {
     ): View {
         val homeViewModel =
             ViewModelProvider(this).get(HomeViewModel::class.java)
-
+        firebaseAuth = FirebaseAuth.getInstance()
+        firebaseAuth.currentUser
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         userEmail = arguments?.getString("USER_EMAIL")
         val root: View = binding.root
         val captureButton = binding.buttonCapture
         captureButton.setOnClickListener {
+//            val call = SpringRetrofitClient.apiService.getItemsByUserEmail(userEmail!!)
+//            call.enqueue(object : Callback<List<DetectionItem>> {
+//                override fun onResponse(
+//                    call: Call<List<DetectionItem>>,
+//                    response: Response<List<DetectionItem>>
+//                ) {
+//                    if (response.isSuccessful) {
+//                        val items = response.body()
+//                        if (items != null) {
+//                            for (item in items) {
+//                                Log.d("MainActivity", "Item: ${item.itemName}, Amount: ${item.amount} ${item.unit}")
+//                            }
+//                        } else {
+//                            Toast.makeText(requireContext(), "No items found", Toast.LENGTH_SHORT).show()
+//                        }
+//                    } else {
+//                        Toast.makeText(
+//                            requireContext(),
+//                            "Error: ${response.code()}",
+//                            Toast.LENGTH_SHORT
+//                        ).show()
+//                    }
+//                }
+//
+//                override fun onFailure(call: Call<List<DetectionItem>>, t: Throwable) {
+//                    Toast.makeText(
+//                        requireContext(),
+//                        "Failed to fetch items: ${t.message}",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                }
+//            })
+
             // AlertDialog 빌더 생성
             val builder = AlertDialog.Builder(requireContext())
             builder.setTitle("냉장고 채우기")
@@ -94,8 +137,33 @@ class HomeFragment : Fragment() {
             // 두 번째 선택지
             builder.setNegativeButton("직접 입력하기") { _, _ ->
                 captureAction = "MANUAL"
-                openCamera() // 선택지 2에 대한 함수 실행
+                val dialogView2 = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_manual_post, null)
+
+                val dialog = AlertDialog.Builder(requireContext())
+                    .setTitle("Enter Details")
+                    .setView(dialogView2)
+                    .setPositiveButton("Submit") { _, _ ->
+                        // Retrieve inputs
+                        val itemName = dialogView2.findViewById<EditText>(R.id.edit_item_name).text.toString()
+                        val amount = dialogView2.findViewById<EditText>(R.id.edit_amount).text.toString().toDoubleOrNull()
+                        val unit = dialogView2.findViewById<EditText>(R.id.edit_unit).text.toString()
+
+                        // Validate inputs
+                        if (itemName.isEmpty() || amount == null || unit.isEmpty()) {
+                            Toast.makeText(requireContext(), "Please fill all fields correctly.", Toast.LENGTH_SHORT).show()
+                            return@setPositiveButton
+                        }
+                        val food = Ingredient(id=0, userId = "", name = itemName, buyDate = "", type = "", quantity = amount.toString(), unit = unit)
+                        ingredientList.add(food)
+                        ingredientAdapter.notifyDataSetChanged()
+                        addItemToDatabase(food)
+
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .create()
+                dialog.show()
             }
+
 
             builder.setNeutralButton("장바구니 불러오기") { _, _ ->
                 captureAction = "CART"
@@ -322,7 +390,10 @@ class HomeFragment : Fragment() {
                 )
                 foodInfos.add(ingredient)
             }
-            for (foodInfo in foodInfos) ingredientList.add(foodInfo)
+            for (foodInfo in foodInfos) {
+                ingredientList.add(foodInfo)
+                addItemToDatabase(foodInfo)
+            }
             ingredientAdapter.notifyDataSetChanged()
             Log.e("HomeFragment", "✅ FoodList: $foodInfos")
         }
@@ -330,7 +401,34 @@ class HomeFragment : Fragment() {
             Log.e("HomeFragment", "❌ Image processing failed")
         }
     }
+    fun addItemToDatabase(item: Ingredient) {
+        val apiService = SpringRetrofitClient.apiService
 
+        val manualItem = ManualItem(
+            itemName = item.name,
+            amount = item.quantity.toDouble(),
+            unit = item.unit
+        )
+        val userEmail = firebaseAuth.currentUser?.email ?: ""
+        Log.e("[addtodb]", "$userEmail, $manualItem")
+        val call = apiService.addManualItem(userEmail, manualItem)
+        call.enqueue(object : retrofit2.Callback<ResponseBody> {
+            override fun onResponse(
+                call: Call<ResponseBody>,
+                response: retrofit2.Response<ResponseBody>
+            ) {
+                if (response.isSuccessful) {
+                    println("Item added successfully!")
+                } else {
+                    println("Error: ${response.code()} - ${response.message()}")
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                println("Request failed: ${t.message}")
+            }
+        })
+    }
     fun getJsonString(responseText: String?): List<Map<String, Any>>{
         val responseString = extractNestedJson(responseText?:"")
         val responseMap: MutableList<Map<String, Any>> = mutableListOf()

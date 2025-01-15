@@ -65,6 +65,12 @@ class SharedViewModel(private val repository: UserRepository) : ViewModel() {
             }
         }
     }
+
+    fun fetchAllItemByEmail(email: String) {
+        viewModelScope.launch {
+
+        }
+    }
 }
 
 
