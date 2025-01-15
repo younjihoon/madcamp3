@@ -29,6 +29,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -255,7 +256,7 @@ class FridgeActivity : AppCompatActivity() {
 
                 // Validate input
                 if (itemUnit.isNotBlank()) {
-
+                    addParentPhone(firebaseAuth.currentUser?.email ?: "", itemUnit)
                     dialog.dismiss()
                 } else {
                     Toast.makeText(this, "모든 필드를 입력해주세요.", Toast.LENGTH_SHORT).show()
@@ -275,5 +276,29 @@ class FridgeActivity : AppCompatActivity() {
             dismissPopup()
             resetAnimation()
         }
+    }
+
+    fun addParentPhone(userEmail: String, parentPhone: String) {
+        val call = SpringRetrofitClient.apiService.addParentPhone(userEmail, parentPhone)
+
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(
+                call: Call<ResponseBody>,
+                response: Response<ResponseBody>
+            ) {
+                if (response.isSuccessful) {
+                    // 성공적으로 요청이 완료된 경우
+                    println("Parent phone added successfully!")
+                } else {
+                    // 요청이 실패한 경우
+                    println("Failed to add parent phone. Code: ${response.code()}, Message: ${response.message()}")
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                // 네트워크 오류 또는 요청 실패 처리
+                println("API call failed: ${t.message}")
+            }
+        })
     }
 }

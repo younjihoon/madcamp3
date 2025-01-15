@@ -57,6 +57,12 @@ interface ApiService {
         @Body item: ManualItem
     ): Call<ResponseBody>
 
+    @POST("api/user/parents-phone")
+    fun addParentPhone(
+        @Query("userEmail") userEmail: String,
+        @Body parentPhone: String
+    ): Call<ResponseBody>
+
     @GET("api/detection/items")
     fun getItemsByUserEmail(
         @Query("userEmail") userEmail: String
