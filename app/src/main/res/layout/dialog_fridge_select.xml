@@ -40,6 +40,7 @@
 
             <!-- 냉장고 채우기 -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/fridge1Button"
                 android:layout_width="0dp"
                 android:layout_height="150dp"
                 android:layout_columnWeight="1"
@@ -100,6 +101,7 @@
 
             <!-- 냉장고 살펴보기 -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/fridge3Button"
                 android:layout_width="0dp"
                 android:layout_height="150dp"
                 android:layout_columnWeight="1"
@@ -130,6 +132,7 @@
 
             <!-- 요리하기 -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/fridge2Button"
                 android:layout_width="0dp"
                 android:layout_height="150dp"
                 android:layout_columnWeight="1"

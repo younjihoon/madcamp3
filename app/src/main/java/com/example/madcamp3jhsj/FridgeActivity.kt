@@ -8,9 +8,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import com.airbnb.lottie.LottieAnimationView
 import com.example.madcamp3jhsj.SpringRetrofitClient.apiService
 import com.example.madcamp3jhsj.data.AppDatabase
@@ -116,7 +118,7 @@ class FridgeActivity : AppCompatActivity() {
         alertDialog.show()
     }
     fun setLoginPopup(dialogView: View, dismissPopup: () -> Unit) {
-        val loginButton = dialogView.findViewById<Button>(R.id.loginButton)
+        val loginButton = dialogView.findViewById<LinearLayout>(R.id.loginButton)
         loginButton.setOnClickListener {
             firebaselogin()
             dismissPopup()
@@ -202,9 +204,9 @@ class FridgeActivity : AppCompatActivity() {
     }
 
     fun setSelectPopup(dialogView: View, dismissPopup: () -> Unit) {
-        val fridge1Button = dialogView.findViewById<Button>(R.id.fridge1Button)
-        val fridge2Button = dialogView.findViewById<Button>(R.id.fridge2Button)
-        val fridge3Button = dialogView.findViewById<Button>(R.id.fridge3Button)
+        val fridge1Button = dialogView.findViewById<CardView>(R.id.fridge1Button)
+        val fridge2Button = dialogView.findViewById<CardView>(R.id.fridge2Button)
+        val fridge3Button = dialogView.findViewById<CardView>(R.id.fridge3Button)
         val cancelButton = dialogView.findViewById<Button>(R.id.cancelButton)
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra("USER_NAME", user.username)

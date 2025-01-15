@@ -87,6 +87,7 @@
 
         <!-- 점수 제목 -->
         <TextView
+            android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="당신의 식습관 점수는?"
