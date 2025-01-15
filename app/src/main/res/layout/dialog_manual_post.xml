@@ -10,21 +10,21 @@
         android:id="@+id/edit_item_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Item Name"
+        android:hint="식재료 이름 (ex. 우유)"
         android:inputType="text" />
 
     <EditText
         android:id="@+id/edit_amount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Amount"
+        android:hint="양 (ex. 500)"
         android:inputType="numberDecimal" />
 
     <EditText
         android:id="@+id/edit_unit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Unit"
+        android:hint="단위 (ex. ml)"
         android:inputType="text" />
 
 </LinearLayout>
