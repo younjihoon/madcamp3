@@ -14,6 +14,8 @@ import com.example.madcamp3jhsj.R
 import com.example.madcamp3jhsj.SharedViewModel
 import com.example.madcamp3jhsj.data.User
 import com.example.madcamp3jhsj.databinding.FragmentNotificationsBinding
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 
 class NotificationsFragment : Fragment() {
@@ -42,20 +44,30 @@ class NotificationsFragment : Fragment() {
         val logoutButton = root.findViewById<Button>(R.id.logout_button)
         val deleteAccountButton = root.findViewById<Button>(R.id.delete_account_button)
         firebaseAuth = FirebaseAuth.getInstance()
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        val googleSignInClient = GoogleSignIn.getClient(requireContext(), gso)
         firebaseAuth.currentUser
         logoutButton.setOnClickListener {
             sharedViewModel.logout(firebaseAuth.currentUser!!.displayName!!)
             firebaseAuth.signOut()
-            Toast.makeText(requireContext(), "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
-            requireActivity().finish()
+            googleSignInClient.signOut().addOnCompleteListener {
+                Toast.makeText(requireContext(), "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
+                requireActivity().finish() // 액티비티 종료
+            }
         }
         userTextView.text = "${firebaseAuth.currentUser!!.displayName!!}님의 식습관 점수는?"
         userNamer.text = firebaseAuth.currentUser!!.displayName!!
         userEmail.text = firebaseAuth.currentUser!!.email!!
         deleteAccountButton.setOnClickListener {
             sharedViewModel.deleteAccountByUserName(firebaseAuth.currentUser!!.displayName!!)
-            Toast.makeText(requireContext(), "계정이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
-            requireActivity().finish()
+            firebaseAuth.signOut()
+            googleSignInClient.signOut().addOnCompleteListener {
+                Toast.makeText(requireContext(), "계정이 삭제 되었습니다.", Toast.LENGTH_SHORT).show()
+                requireActivity().finish() // 액티비티 종료
+            }
         }
         return root
     }

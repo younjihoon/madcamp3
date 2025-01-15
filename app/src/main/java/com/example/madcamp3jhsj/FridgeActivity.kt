@@ -79,6 +79,9 @@ class FridgeActivity : AppCompatActivity() {
     }
     override fun onResume() {
         super.onResume()
+        lottieView.setOnClickListener {
+            null
+        }
         userinit()
     }
     private fun resetAnimation() {
@@ -120,7 +123,6 @@ class FridgeActivity : AppCompatActivity() {
         loginButton.setOnClickListener {
             firebaselogin()
             dismissPopup()
-
         }
     }
 
