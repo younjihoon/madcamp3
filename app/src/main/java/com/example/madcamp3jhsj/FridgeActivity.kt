@@ -104,6 +104,7 @@ class FridgeActivity : AppCompatActivity() {
         }
     }
     fun fetchDataFromRDS() {
+        Class.forName("com.mysql.cj.jdbc.Driver")
         val url = "jdbc:mysql://fridge-rds.cjymas6uwg1h.ap-northeast-2.rds.amazonaws.com:3306/myfridge"
         val username = "root"
         val password = "sojeong0"
